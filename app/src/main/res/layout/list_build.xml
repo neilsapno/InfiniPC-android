@@ -9,7 +9,7 @@
     android:padding="8dp">
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/iv_parts"
         android:layout_width="250px"
         android:layout_height="250px"
         tools:srcCompat="@tools:sample/avatars" />
@@ -21,35 +21,36 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tv_buildName"
+            android:id="@+id/tv_pTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Build Name"
+            android:text="Name"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
         <TextView
-            android:id="@+id/tv_cpu"
+            android:id="@+id/tv_parts_1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5px"
-            android:text="Processor:"
+            android:text="Speed"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textIsSelectable="false" />
 
         <TextView
-            android:id="@+id/tv_ram"
+            android:id="@+id/tv_parts_2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Memory:"
+            android:text="Watts"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <TextView
-            android:id="@+id/tv_estPrice"
+            android:id="@+id/tv_parts_3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Est. Price: "
+            android:text="Price:"
             android:textAlignment="viewEnd"
             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
     </LinearLayout>
 
 </LinearLayout>
+

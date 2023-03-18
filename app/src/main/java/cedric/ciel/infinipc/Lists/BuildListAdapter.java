@@ -52,10 +52,10 @@ public class BuildListAdapter extends RecyclerView.Adapter<BuildListAdapter.View
         TextView build_name,cpu_name,cpu_cooler, mobo_name;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            build_name=itemView.findViewById(R.id.tv_buildName);
-            cpu_name=itemView.findViewById(R.id.tv_cpu);
-            cpu_cooler=itemView.findViewById(R.id.tv_ram);
-            mobo_name=itemView.findViewById(R.id.tv_estPrice);
+            build_name=itemView.findViewById(R.id.tv_title);
+            cpu_name=itemView.findViewById(R.id.tv_parts_1);
+            cpu_cooler=itemView.findViewById(R.id.tv_parts_2);
+            mobo_name=itemView.findViewById(R.id.tv_parts_3);
         }
     }
 }
