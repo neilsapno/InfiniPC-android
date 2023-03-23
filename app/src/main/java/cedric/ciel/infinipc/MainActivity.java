@@ -1,28 +1,47 @@
 package cedric.ciel.infinipc;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.database.Cursor;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
+import cedric.ciel.infinipc.Lists.BuildData;
 import cedric.ciel.infinipc.Lists.BuildListAdapter;
-import cedric.ciel.infinipc.Utils.DBHelper;
+import cedric.ciel.infinipc.Utils.DBHandler;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
+    DBHandler dbHandler;
+    SharedPreferences sharedPreferences;
     RecyclerView recyclerView;
-    ArrayList<String> bname,processor,cpu_cooler,motherboard;
-    DBHelper db;
+    RecyclerView.Adapter mAdapter;
+    RecyclerView.LayoutManager layoutManager;
+
+    //ArrayList<String> bname, memory, watts, price;
+    ArrayList<BuildData> buildData;
     BuildListAdapter adapter;
     private FloatingActionButton btn_addBuild;
 
@@ -34,16 +53,20 @@ public class MainActivity extends AppCompatActivity {
         StrictMode.setThreadPolicy(policy);
 
         btn_addBuild = findViewById(R.id.btn_addBuild);
-        db = new DBHelper( this);
-        bname=new ArrayList<>();
-        processor=new ArrayList<>();
-        cpu_cooler=new ArrayList<>();
-        motherboard=new ArrayList<>();
         recyclerView=findViewById(R.id.recommendedBuilds);
-        adapter = new BuildListAdapter(this,bname,processor,cpu_cooler,motherboard);
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        displayData();
+
+        CoordinatorLayout coordinatorLayout = findViewById(R.id.coordinatorLayout);
+
+        sharedPreferences = getSharedPreferences("Parts",MODE_PRIVATE);
+        dbHandler = new DBHandler(this);
+        layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        buildData = new ArrayList<>();
+        buildData = dbHandler.getBuilds(buildData);
+        mAdapter = new BuildListAdapter(this, buildData);
+        recyclerView.setAdapter(mAdapter);
+
+        downloadParts();
 
         btn_addBuild.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -53,23 +76,50 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void displayData() {
-        Cursor cursor=db.getData();
-        if (cursor.getCount()==0){
-            Toast.makeText(this, "No Data Exists", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        else
-        {
-            while (cursor.moveToNext())
-            {
-                bname.add(cursor.getString(0));
-                processor.add(cursor.getString(1));
-                cpu_cooler.add(cursor.getString(2));
-                motherboard.add(cursor.getString(3));
+    private void downloadParts() {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
+        progressDialog.setMessage("Updating parts list...");
+        progressDialog.setTitle("Please wait...");
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.show();
+        progressDialog.setCancelable(false);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                OkHttpClient client = new OkHttpClient();
+                Request request = new Request.Builder()
+                        .url("https://computer-components-api.p.rapidapi.com/processor?limit=5&offset=0")
+                        .get()
+                        .addHeader("X-RapidAPI-Key", "30fb07d56dmshe61110abc62ea9dp1cd8a6jsn6af1119c8e56")
+                        .addHeader("X-RapidAPI-Host", "computer-components-api.p.rapidapi.com")
+                        .build();
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onResponse(Call call, final Response response) throws IOException {
+                        String responseData = response.body().string();
+                        try {
+                            editor.putString("processors", responseData);
+                            editor.commit();
+                            JSONArray jsonArray = new JSONArray(sharedPreferences.getString("processors", ""));
+                            for(int i = 0; i<jsonArray.length();i++) {
+                                JSONObject json = jsonArray.getJSONObject(i);
+                                //cpu.setJSONResponse(json);
+                                Log.d("JSON get", "json: " + json);
+                            }
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                        progressDialog.dismiss();
+                    }
 
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        progressDialog.dismiss();
+                    }
+
+                });
             }
-        }
+        }).start();
     }
-
 }

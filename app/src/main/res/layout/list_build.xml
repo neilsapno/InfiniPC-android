@@ -9,7 +9,7 @@
     android:padding="8dp">
 
     <ImageView
-        android:id="@+id/iv_parts"
+        android:id="@+id/iv_build"
         android:layout_width="250px"
         android:layout_height="250px"
         tools:srcCompat="@tools:sample/avatars" />
@@ -21,30 +21,30 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tv_pTitle"
+            android:id="@+id/tv_bName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Name"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
         <TextView
-            android:id="@+id/tv_parts_1"
+            android:id="@+id/tv_ram"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5px"
-            android:text="Speed"
+            android:text="RAM:"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textIsSelectable="false" />
 
         <TextView
-            android:id="@+id/tv_parts_2"
+            android:id="@+id/tv_watts"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Watts"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <TextView
-            android:id="@+id/tv_parts_3"
+            android:id="@+id/tv_estPrice"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Price:"
