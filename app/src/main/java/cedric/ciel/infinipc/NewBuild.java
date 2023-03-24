@@ -72,5 +72,12 @@ public class NewBuild extends AppCompatActivity {
     }
 
     private void partsSelector() {
+        cv_cpu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent browseCPU = new Intent(NewBuild.this, BrowseParts.class);
+                startActivity(browseCPU);
+            }
+        });
     }
 }
