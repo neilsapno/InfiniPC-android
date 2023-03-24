@@ -21,20 +21,17 @@ public class DBHandler extends SQLiteOpenHelper {
 
     // below variable is for our table name.
     private static final String TABLE_NAME = "mybuilds";
+    private static final String TABLE_NAME_2 = "buildparts";
 
-    // below variable is for our id column.
+
     private static final String ID_COL = "id";
 
-    // below variable is for our course name column
     private static final String BUILD_NAME_COL = "build_name";
 
-    // below variable id for our course duration column.
     private static final String PROCESSOR_COL = "cpu";
 
-    // below variable for our course description column.
     private static final String COOLER_COL = "cpu_cooler";
 
-    // below variable is for our course tracks column.
     private static final String MOTHERBOARD_COL = "motherboard";
     private static final String MEMORY_COL = "ram";
     private static final String STORAGE_COL = "storage";
@@ -77,9 +74,23 @@ public class DBHandler extends SQLiteOpenHelper {
                 + PRICE_COL + " REAL,"
                 + BUILDIMG_COL + " TEXT)";
 
+        String query2 = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME_2 + " ("
+                + BUILD_NAME_COL + " TEXT PRIMARY KEY,"
+                + PROCESSOR_COL + " TEXT,"
+                + COOLER_COL + " TEXT,"
+                + MOTHERBOARD_COL + " TEXT,"
+                + MEMORY_COL + " TEXT,"
+                + STORAGE_COL + " TEXT,"
+                + VIDEOCARD_COL + " TEXT,"
+                + CASE_COL + " TEXT,"
+                + POWERSUPPLY_COL + " TEXT,"
+                + CASEFAN_COL + " TEXT,"
+                + PRICE_COL + " REAL)";
+
         // at last we are calling a exec sql
         // method to execute above sql query
         db.execSQL(query);
+        db.execSQL(query2);
     }
 
     // this method is use to add new course to our sqlite database.
@@ -152,6 +163,7 @@ public class DBHandler extends SQLiteOpenHelper {
                 // cursor to our array list.
                 buildData.add(new BuildData(
                         cursorBuilds.getString(1),
+                        cursorBuilds.getString(2),
                         cursorBuilds.getInt(11),
                         cursorBuilds.getInt(12),
                         cursorBuilds.getDouble(13)));
@@ -162,6 +174,11 @@ public class DBHandler extends SQLiteOpenHelper {
         // and returning our array list.
         cursorBuilds.close();
         return buildData;
+    }
+
+    public void setBuildParts(String buildName, String CPU, String Cooler, String Mobo, String RAM, String Storage,
+                              String GPU, String Case, String PSU, String CaseFan, double Price){
+
     }
 
 }

@@ -35,6 +35,7 @@ public class BuildListAdapter extends RecyclerView.Adapter<BuildListAdapter.View
         BuildData buildData = mbuildData.get(position);
 
         holder.tv_bName.setText(buildData.getBuild_name());
+        holder.tv_CPU.setText("CPU: "+buildData.getCpu_name());
         holder.tv_Memory.setText("Memory: "+buildData.getRam_count() +"GB");
         holder.tv_Watts.setText("Watts: "+buildData.getWatts());
         holder.tv_Price.setText("Est Price: $"+buildData.getEst_price());
@@ -47,11 +48,12 @@ public class BuildListAdapter extends RecyclerView.Adapter<BuildListAdapter.View
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView tv_bName, tv_Memory, tv_Watts, tv_Price;
+        private TextView tv_bName, tv_CPU, tv_Memory, tv_Watts, tv_Price;
 
         public ViewHolder(View itemView) {
             super(itemView);
             tv_bName = itemView.findViewById(R.id.tv_bName);
+            tv_CPU = itemView.findViewById(R.id.tv_cpu);
             tv_Memory = itemView.findViewById(R.id.tv_ram);
             tv_Watts = itemView.findViewById(R.id.tv_watts);
             tv_Price = itemView.findViewById(R.id.tv_estPrice);

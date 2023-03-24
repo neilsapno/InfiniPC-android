@@ -26,7 +26,14 @@
             android:layout_height="wrap_content"
             android:text="Name"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
-
+        <TextView
+            android:id="@+id/tv_cpu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5px"
+            android:text="CPU:"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textIsSelectable="false" />
         <TextView
             android:id="@+id/tv_ram"
             android:layout_width="match_parent"

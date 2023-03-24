@@ -5,9 +5,10 @@ public class BuildData {
     private int ram_count, watts, productId;
     double est_price;
 
-    public BuildData(String build_name, int ram_count, int watts, double est_price) {
+    public BuildData(String build_name, String cpu_name, int ram_count, int watts, double est_price) {
         this.productId = productId;
         this.build_name = build_name;
+        this.cpu_name = cpu_name;
         this.watts = watts;
         this.ram_count = ram_count;
         this.est_price = est_price;

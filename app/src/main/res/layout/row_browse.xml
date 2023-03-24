@@ -2,21 +2,23 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    android:padding="8dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cv_cpu"
         android:layout_width="match_parent"
-        android:layout_height="130dp"
-        android:layout_marginTop="10dp"
-        app:contentPadding="4dp">
+        android:layout_height="wrap_content"
+        android:minHeight="140dp"
+        app:cardCornerRadius="6dp"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="true"
+        app:contentPadding="6dp">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <LinearLayout
@@ -27,27 +29,26 @@
 
                 <TextView
                     android:id="@+id/tv_partsTitle"
-                    android:layout_width="320dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:maxLines="2"
-                    android:text="Parts Name"
+                    android:layout_weight="1"
+                    android:maxLines="3"
+                    android:text="CPU Name:"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <ImageButton
                     android:id="@+id/imageButton"
-                    android:layout_width="wrap_content"
+                    android:layout_width="100dp"
                     android:layout_height="30dp"
-                    android:layout_weight="2"
-                    android:adjustViewBounds="false"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/amazon"
-                    app:srcCompat="@drawable/ic_launcher_foreground" />
+                    android:layout_weight="1"
+                    android:background="@drawable/amazon"
+                    android:scaleType="fitXY" />
             </LinearLayout>
 
             <TextView
                 android:id="@+id/tv_partsInfo1"
-                tools:visibility="invisible"
+
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
@@ -56,7 +57,7 @@
 
             <TextView
                 android:id="@+id/tv_partsInfo2"
-                tools:visibility="invisible"
+
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
@@ -64,7 +65,7 @@
 
             <TextView
                 android:id="@+id/tv_partsInfo3"
-                tools:visibility="invisible"
+
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
@@ -78,11 +79,17 @@
 
                 <TextView
                     android:id="@+id/tv_partsInfo4"
-                    tools:visibility="invisible"
+
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
                     android:text="TextView" />
+
+                <TextView
+                    android:id="@+id/tv_partsId"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/tv_partsPrice"

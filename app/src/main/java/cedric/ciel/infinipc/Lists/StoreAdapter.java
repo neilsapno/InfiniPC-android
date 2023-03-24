@@ -15,18 +15,21 @@ import cedric.ciel.infinipc.R;
 public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> {
     private ArrayList<StoreParts> mstoreParts = new ArrayList<>();
     private Context mContext;
+    private OnPartClickListener onPartClickListener;
 
-    public StoreAdapter(Context context, ArrayList<StoreParts> storeParts) {
+    public StoreAdapter(Context context, ArrayList<StoreParts> storeParts, OnPartClickListener onPartClickListener) {
         mContext = context;
         mstoreParts = storeParts;
+        this.onPartClickListener = onPartClickListener;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_browse, parent, false);
-        ViewHolder viewHolder = new ViewHolder(view);
+        ViewHolder viewHolder = new ViewHolder(view, this.onPartClickListener);
         return viewHolder;
     }
+
 
     @Override
     public void onBindViewHolder(StoreAdapter.ViewHolder holder, int position) {
@@ -40,6 +43,11 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         holder.tv_partsInfo3.setText(""+storeParts.getTv_partsInfo3());
         holder.tv_partsInfo4.setText(""+storeParts.getTv_partsInfo4());
         holder.tv_partsPrice.setText("$"+storeParts.getTv_partsPrice());
+        holder.tv_partsId.setText(storeParts.getPartsID());
+    }
+
+    public interface OnPartClickListener{
+        void onPartClick(int position, String partID);
     }
 
     @Override
@@ -47,18 +55,28 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         return mstoreParts.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-        private TextView tv_partsTitle, tv_partsInfo1, tv_partsInfo2, tv_partsInfo3, tv_partsInfo4,tv_partsPrice;
+        OnPartClickListener onPartClickListener;
+        private TextView tv_partsTitle, tv_partsInfo1, tv_partsInfo2, tv_partsInfo3, tv_partsInfo4,tv_partsPrice, tv_partsId;
 
-        public ViewHolder(View itemView) {
+        public ViewHolder(View itemView, OnPartClickListener onPartClickListener) {
             super(itemView);
             tv_partsTitle = itemView.findViewById(R.id.tv_partsTitle);
             tv_partsInfo1 = itemView.findViewById(R.id.tv_partsInfo1);
             tv_partsInfo2 = itemView.findViewById(R.id.tv_partsInfo2);
-            tv_partsInfo3 = itemView.findViewById(R.id.tv_partsInfo2);
+            tv_partsInfo3 = itemView.findViewById(R.id.tv_partsInfo3);
             tv_partsInfo4 = itemView.findViewById(R.id.tv_partsInfo4);
             tv_partsPrice = itemView.findViewById(R.id.tv_partsPrice);
+            tv_partsId = itemView.findViewById(R.id.tv_partsId);
+
+            itemView.setOnClickListener(this);
+            this.onPartClickListener = onPartClickListener;
+        }
+
+        @Override
+        public void onClick(View view) {
+            this.onPartClickListener.onPartClick(getAdapterPosition(), tv_partsId.getText().toString());
         }
     }
 }

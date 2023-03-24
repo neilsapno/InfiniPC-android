@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
     DBHandler dbHandler;
     SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
     RecyclerView recyclerView;
     RecyclerView.Adapter mAdapter;
     RecyclerView.LayoutManager layoutManager;
@@ -57,7 +58,10 @@ public class MainActivity extends AppCompatActivity {
 
         CoordinatorLayout coordinatorLayout = findViewById(R.id.coordinatorLayout);
 
-        sharedPreferences = getSharedPreferences("Parts",MODE_PRIVATE);
+        //SharedPref
+        sharedPreferences = getSharedPreferences(getPackageName() +"Parts",MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+
         dbHandler = new DBHandler(this);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
@@ -66,18 +70,17 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new BuildListAdapter(this, buildData);
         recyclerView.setAdapter(mAdapter);
 
-        downloadParts();
+        if(sharedPreferences.getBoolean(getPackageName() +"isFirstRun?", true)) downloadParts();
 
         btn_addBuild.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this,NewBuild.class));
+                startActivity(new Intent(MainActivity.this,NewBuild.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
             }
         });
     }
 
     private void downloadParts() {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
         ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
         progressDialog.setMessage("Updating parts list...");
         progressDialog.setTitle("Please wait...");
@@ -89,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 OkHttpClient client = new OkHttpClient();
                 Request request = new Request.Builder()
-                        .url("https://computer-components-api.p.rapidapi.com/processor?limit=5&offset=0")
+                        .url("https://computer-components-api.p.rapidapi.com/processor?limit=100&offset=0")
                         .get()
                         .addHeader("X-RapidAPI-Key", "30fb07d56dmshe61110abc62ea9dp1cd8a6jsn6af1119c8e56")
                         .addHeader("X-RapidAPI-Host", "computer-components-api.p.rapidapi.com")
@@ -99,9 +102,10 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(Call call, final Response response) throws IOException {
                         String responseData = response.body().string();
                         try {
-                            editor.putString("processors", responseData);
-                            editor.commit();
-                            JSONArray jsonArray = new JSONArray(sharedPreferences.getString("processors", ""));
+                            editor.putString(getPackageName() +"processors", responseData);
+                            editor.putBoolean(getPackageName() +"isFirstRun?", false);
+                            editor.apply();
+                            JSONArray jsonArray = new JSONArray(sharedPreferences.getString(getPackageName()+"processors", ""));
                             for(int i = 0; i<jsonArray.length();i++) {
                                 JSONObject json = jsonArray.getJSONObject(i);
                                 //cpu.setJSONResponse(json);
