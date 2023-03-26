@@ -27,6 +27,7 @@ public class BrowseParts extends AppCompatActivity implements StoreAdapter.OnPar
     SharedPreferences sharedPreferences;
     SharedPreferences sharedPreferences1;
     SharedPreferences.Editor editor;
+    String typePart;
     RecyclerView recyclerView;
     RecyclerView.Adapter mAdapter;
     RecyclerView.LayoutManager layoutManager;
@@ -50,31 +51,79 @@ public class BrowseParts extends AppCompatActivity implements StoreAdapter.OnPar
         recyclerView.setLayoutManager(layoutManager);
         storeParts = new ArrayList<>();
 
-        //StoreParts(String tv_partsTitle, String tv_partsInfo1, String tv_partsInfo2, String tv_partsInfo3, String tv_partsInfo4, String partsID, double tv_partsPrice)
-        try {
-            JSONArray jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() +"processors", ""));
-            Toast.makeText(this, ""+jsonArray.length(), Toast.LENGTH_SHORT).show();
-            for(int i = 0; i<jsonArray.length();i++) {
-                JSONObject json = jsonArray.getJSONObject(i);
-                storeParts.add(new StoreParts(json.getString("img"), json.getString("title"), json.getString("brand"), json.getString("model"), json.getString("speed"), json.getString("socketType"), json.getString("id"), json.getString("link"), json.getDouble("price")));
-                //Log.d("JSON get", "json: " + json);
-                Snackbar.make(store_coordinator, "Processors Loaded", Snackbar.LENGTH_SHORT).show();
+        Intent type = getIntent();
+        typePart = type.getStringExtra("type");
+        if(typePart.equals("CPU")) {
+            //StoreParts(String img_url, String tv_partsTitle, String tv_partsInfo1, String tv_partsInfo2, String tv_partsInfo3, String tv_partsInfo4, String partsID, String link, double tv_partsPrice)
+            try {
+                JSONArray jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "processors", ""));
+                Toast.makeText(this, "" + jsonArray.length(), Toast.LENGTH_SHORT).show();
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject json = jsonArray.getJSONObject(i);
+                    storeParts.add(new StoreParts(json.getString("img"), json.getString("title"), json.getString("brand"), json.getString("model"), json.getString("speed"), json.getString("socketType"), json.getString("id"), json.getString("link"), json.getDouble("price")));
+                    //Log.d("JSON get", "json: " + json);
+                    Snackbar.make(store_coordinator, "Processors Loaded", Snackbar.LENGTH_SHORT).show();
 
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Snackbar.make(store_coordinator, "Something went wrong while getting parts list", Snackbar.LENGTH_LONG).show();
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Snackbar.make(store_coordinator, "Something went wrong while getting parts list", Snackbar.LENGTH_LONG).show();
         }
+        else if(typePart.equals("Coolers")) {
+            //StoreParts(String img_url, String tv_partsTitle, String tv_partsInfo1, String tv_partsInfo2, String tv_partsInfo3, String tv_partsInfo4, String partsID, String link, double tv_partsPrice)
+            try {
+                JSONArray jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "coolers", ""));
+                Toast.makeText(this, "" + jsonArray.length(), Toast.LENGTH_SHORT).show();
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject json = jsonArray.getJSONObject(i);
+                    storeParts.add(new StoreParts(json.getString("img"), json.getString("title"), json.getString("brand"), json.getString("model"), json.getString("rpm"), json.getString("noiseLevel"), json.getString("id"), json.getString("link"), json.getDouble("price")));
+                    //Log.d("JSON get", "json: " + json);
+                    Snackbar.make(store_coordinator, "Coolers Loaded", Snackbar.LENGTH_SHORT).show();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Snackbar.make(store_coordinator, "Something went wrong while getting parts list", Snackbar.LENGTH_LONG).show();
+            }
+        }
+        else if(typePart.equals("Mobos")) {
+            //StoreParts(String img_url, String tv_partsTitle, String tv_partsInfo1, String tv_partsInfo2, String tv_partsInfo3, String tv_partsInfo4, String partsID, String link, double tv_partsPrice)
+            try {
+                JSONArray jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "mobos", ""));
+                Toast.makeText(this, "" + jsonArray.length(), Toast.LENGTH_SHORT).show();
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject json = jsonArray.getJSONObject(i);
+                    storeParts.add(new StoreParts(json.getString("img"), json.getString("title"), json.getString("brand")+" "+json.getString("model"), json.getString("formFactor"), json.getString("memorySlots"), json.getString("socketType"), json.getString("id"), json.getString("link"), json.getDouble("price")));
+                    //Log.d("JSON get", "json: " + json);
+                    Snackbar.make(store_coordinator, "Motherboards Loaded", Snackbar.LENGTH_SHORT).show();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Snackbar.make(store_coordinator, "Something went wrong while getting parts list", Snackbar.LENGTH_LONG).show();
+            }
+        }
+
+
         mAdapter = new StoreAdapter(this, storeParts, this);
         recyclerView.setAdapter(mAdapter);
     }
 
     @Override
     public void onPartClick(int position, String partID) {
-        Toast.makeText(BrowseParts.this,partID,Toast.LENGTH_SHORT).show();
-        editor.putString("temp_CPU", getPartsInfo(partID));
+        if(typePart.equalsIgnoreCase("CPU")) {
+            Toast.makeText(BrowseParts.this, partID, Toast.LENGTH_SHORT).show();
+            editor.putString("temp_CPU", getPartsInfo(partID));
+        }
+        else if(typePart.equalsIgnoreCase("Coolers")){
+            Toast.makeText(BrowseParts.this, partID, Toast.LENGTH_SHORT).show();
+            editor.putString("temp_Cooler", getPartsInfo(partID));
+        }
+        else if(typePart.equalsIgnoreCase("Mobos")){
+            Toast.makeText(BrowseParts.this, partID, Toast.LENGTH_SHORT).show();
+            editor.putString("temp_Cooler", getPartsInfo(partID));
+        }
         editor.apply();
-        Intent newbuild = new Intent(BrowseParts.this, NewBuild.class);
+        Intent newbuild = new Intent(BrowseParts.this, NewBuild.class).setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(newbuild);
         finish();
     }

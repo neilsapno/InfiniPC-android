@@ -5,8 +5,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,10 +15,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView.LayoutManager layoutManager;
 
     //ArrayList<String> bname, memory, watts, price;
-    ArrayList<BuildData> buildData;
+    ArrayList<BuildData> buildData = new ArrayList<>();
     BuildListAdapter adapter;
     private FloatingActionButton btn_addBuild;
 
@@ -54,28 +50,28 @@ public class MainActivity extends AppCompatActivity {
         StrictMode.setThreadPolicy(policy);
 
         btn_addBuild = findViewById(R.id.btn_addBuild);
-        recyclerView=findViewById(R.id.recommendedBuilds);
+        recyclerView = findViewById(R.id.recommendedBuilds);
 
         CoordinatorLayout coordinatorLayout = findViewById(R.id.coordinatorLayout);
 
         //SharedPref
-        sharedPreferences = getSharedPreferences(getPackageName() +"Parts",MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences(getPackageName() + "Parts", MODE_PRIVATE);
         editor = sharedPreferences.edit();
 
         dbHandler = new DBHandler(this);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        buildData = new ArrayList<>();
         buildData = dbHandler.getBuilds(buildData);
+        Toast.makeText(this, ""+buildData.get(2), Toast.LENGTH_SHORT).show();
         mAdapter = new BuildListAdapter(this, buildData);
         recyclerView.setAdapter(mAdapter);
 
-        if(sharedPreferences.getBoolean(getPackageName() +"isFirstRun?", true)) downloadParts();
+        if (sharedPreferences.getBoolean(getPackageName() + "isFirstRun?", true)) downloadParts();
 
         btn_addBuild.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this,NewBuild.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                startActivity(new Intent(MainActivity.this, NewBuild.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
             }
         });
     }
@@ -91,39 +87,112 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 OkHttpClient client = new OkHttpClient();
-                Request request = new Request.Builder()
-                        .url("https://computer-components-api.p.rapidapi.com/processor?limit=100&offset=0")
-                        .get()
+                Request headerTemplate = new Request.Builder()
+                        .url("https://computer-components-api.p.rapidapi.com")
                         .addHeader("X-RapidAPI-Key", "30fb07d56dmshe61110abc62ea9dp1cd8a6jsn6af1119c8e56")
                         .addHeader("X-RapidAPI-Host", "computer-components-api.p.rapidapi.com")
                         .build();
-                client.newCall(request).enqueue(new Callback() {
+
+                Request processorRequest = headerTemplate.newBuilder()
+                        .url("https://computer-components-api.p.rapidapi.com/processor?limit=100&offset=0")
+                        .get()
+                        .build();
+                //CPU
+                client.newCall(processorRequest).enqueue(new Callback() {
                     @Override
                     public void onResponse(Call call, final Response response) throws IOException {
-                        String responseData = response.body().string();
-                        try {
-                            editor.putString(getPackageName() +"processors", responseData);
-                            editor.putBoolean(getPackageName() +"isFirstRun?", false);
-                            editor.apply();
-                            JSONArray jsonArray = new JSONArray(sharedPreferences.getString(getPackageName()+"processors", ""));
-                            for(int i = 0; i<jsonArray.length();i++) {
-                                JSONObject json = jsonArray.getJSONObject(i);
-                                //cpu.setJSONResponse(json);
-                                Log.d("JSON get", "json: " + json);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                progressDialog.setMessage("Downloading CPUs...");
                             }
-                        } catch (JSONException e) {
-                            throw new RuntimeException(e);
-                        }
+                        });
+                        String responseData = response.body().string();
+                        editor.putString(getPackageName() + "processors", responseData);
+                        editor.apply();
+                        //                        progressDialog.dismiss();
+                        call.cancel();
+                        response.close();
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        call.cancel();
+                        progressDialog.dismiss();
+                    }
+
+                });
+                //Cooolers
+
+                Request coolerRequest = headerTemplate.newBuilder()
+                        .url("https://computer-components-api.p.rapidapi.com/cpu_fan?limit=100&offset=0")
+                        .get()
+                        .build();
+                client.newCall(coolerRequest).enqueue(new Callback() {
+                    @Override
+                    public void onResponse(Call call, final Response response) throws IOException {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressDialog.setMessage("Downloading CPU Coolers...");
+                            }
+                        });
+                        String responseData = response.body().string();
+                        editor.putString(getPackageName() + "coolers", responseData);
+                        editor.apply();
+//                        progressDialog.dismiss();
+                        call.cancel();
+                        response.close();
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        call.cancel();
+                        progressDialog.dismiss();
+                    }
+                });
+                //Motherboards
+
+                Request moboRequest = headerTemplate.newBuilder()
+                        .url("https://computer-components-api.p.rapidapi.com/motherboard?limit=100&offset=0")
+                        .get()
+                        .build();
+                client.newCall(moboRequest).enqueue(new Callback() {
+                    @Override
+                    public void onResponse(Call call, final Response response) throws IOException {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressDialog.setMessage("Downloading Motherboards...");
+                            }
+                        });
+                        String responseData = response.body().string();
+                        editor.putString(getPackageName() + "mobos", responseData);
+                        editor.putBoolean(getPackageName() + "isFirstRun?", false);
+                        editor.apply();
+//                        progressDialog.dismiss();
+                        call.cancel();
+                        response.close();
                         progressDialog.dismiss();
                     }
 
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        call.cancel();
                         progressDialog.dismiss();
                     }
-
                 });
             }
         }).start();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        SharedPreferences sp = getSharedPreferences(getPackageName() + "Picked_Parts", MODE_PRIVATE);
+        sp.edit().remove("temp_CPU");
+
+        sp.edit().apply();
     }
 }

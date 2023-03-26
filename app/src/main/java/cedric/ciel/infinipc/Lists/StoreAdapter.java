@@ -4,9 +4,13 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.util.ArrayList;
 
@@ -32,11 +36,14 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
 
 
     @Override
-    public void onBindViewHolder(StoreAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, int position) {
         holder.itemView.setTag(mstoreParts.get(position));
 
         StoreParts storeParts = mstoreParts.get(position);
-
+        Glide.with(mContext)
+                .load(storeParts.getImg_url())
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(holder.imageView);
         holder.tv_partsTitle.setText(storeParts.getTv_partsTitle());
         holder.tv_partsInfo1.setText(""+storeParts.getTv_partsInfo1() +"");
         holder.tv_partsInfo2.setText(""+storeParts.getTv_partsInfo2());
@@ -58,10 +65,12 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         OnPartClickListener onPartClickListener;
+        private ImageView imageView;
         private TextView tv_partsTitle, tv_partsInfo1, tv_partsInfo2, tv_partsInfo3, tv_partsInfo4,tv_partsPrice, tv_partsId;
 
         public ViewHolder(View itemView, OnPartClickListener onPartClickListener) {
             super(itemView);
+            imageView = itemView.findViewById(R.id.imageview_partsImg);
             tv_partsTitle = itemView.findViewById(R.id.tv_partsTitle);
             tv_partsInfo1 = itemView.findViewById(R.id.tv_partsInfo1);
             tv_partsInfo2 = itemView.findViewById(R.id.tv_partsInfo2);

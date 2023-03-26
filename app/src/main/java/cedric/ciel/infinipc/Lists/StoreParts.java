@@ -83,6 +83,14 @@ public class StoreParts {
     public void setLink(String link) {
         this.link = link;
     }
+
+    public String getImg_url() {
+        return img_url;
+    }
+
+    public void setImg_url(String img_url) {
+        this.img_url = img_url;
+    }
 }
 
 

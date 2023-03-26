@@ -17,19 +17,16 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import org.json.JSONObject;
 
 import cedric.ciel.infinipc.Utils.DBHandler;
-import cedric.ciel.infinipc.databinding.ActivityNewBuildBinding;
+import cedric.ciel.infinipc.databinding.ActivityEditBuildBinding;
 
-public class NewBuild extends AppCompatActivity {
+public class EditBuild extends AppCompatActivity {
 
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     DBHandler dbHandler;
-    ActivityNewBuildBinding newBuildBinding;
-    //private TextView tv_cpu_name,tv_cpu_brand, tv_cpu_model, tv_cpu_speed, tv_cpu_socket, tv_cpu_price, tv_cooler_name, tv_cooler_brand, tv_cooler_model, tv_cooler_rpm, tv_cooler_noiselvl,
-    //       tv_mobo_name, tv_mobo_model, tv_mobo_form, tv_mobo_ramslot, tv_mobo_socket, tv;
+    ActivityEditBuildBinding newBuildBinding;
     private ImageView iv_cpuImg;
     private EditText et_buildName;
-    //private CardView cv_cpu, cv_cooler, cv_mobo, cv_memory, cv_storage, cv_gpu, cv_case, cv_psu, cv_casefan;
     private String BuildName, CPU, Cooler, Mobo, Memory, Storage, GPU, Case, PSU, CaseFan, BuildImgUrl;
     private int RAMCount, Watts;
     private double Price;
@@ -37,7 +34,7 @@ public class NewBuild extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        newBuildBinding = ActivityNewBuildBinding.inflate(getLayoutInflater());
+        newBuildBinding = ActivityEditBuildBinding.inflate(getLayoutInflater());
         setContentView(newBuildBinding.getRoot());
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -46,7 +43,9 @@ public class NewBuild extends AppCompatActivity {
         sharedPreferences = getSharedPreferences(this.getPackageName() +"Picked_Parts", MODE_PRIVATE);
         editor = sharedPreferences.edit();
 
-        //initialize();
+
+        Intent update = getIntent();
+
         FloatingActionButton btn_saveBuild = findViewById(R.id.btn_saveBuild);
 
         dbHandler = new DBHandler(this);
@@ -69,9 +68,9 @@ public class NewBuild extends AppCompatActivity {
                 Price = 600.00;
                 BuildImgUrl = "https://";
 
-                dbHandler.addNewBuild(BuildName, CPU, Cooler, Mobo, Memory, Storage, GPU, Case, PSU, CaseFan, RAMCount, Watts, Price, BuildImgUrl);
+                dbHandler.addEditBuild(BuildName, CPU, Cooler, Mobo, Memory, Storage, GPU, Case, PSU, CaseFan, RAMCount, Watts, Price, BuildImgUrl);
                 dbHandler.close();
-                Intent builds = new Intent(NewBuild.this, MainActivity.class);
+                Intent builds = new Intent(EditBuild.this, MainActivity.class);
                 startActivity(builds);
             }
         });
@@ -83,7 +82,7 @@ public class NewBuild extends AppCompatActivity {
         newBuildBinding.cvCpu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent browseCPU = new Intent(NewBuild.this, BrowseParts.class);
+                Intent browseCPU = new Intent(EditBuild.this, BrowseParts.class);
                 browseCPU.putExtra("type", "CPU");
                 startActivity(browseCPU);
             }
@@ -91,7 +90,7 @@ public class NewBuild extends AppCompatActivity {
         newBuildBinding.cvCpuCooler.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent browseCoolers = new Intent(NewBuild.this, BrowseParts.class);
+                Intent browseCoolers = new Intent(EditBuild.this, BrowseParts.class);
                 browseCoolers.putExtra("type", "Coolers");
                 startActivity(browseCoolers);
             }
@@ -99,7 +98,7 @@ public class NewBuild extends AppCompatActivity {
         newBuildBinding.cvMobo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent browseCoolers = new Intent(NewBuild.this, BrowseParts.class);
+                Intent browseCoolers = new Intent(EditBuild.this, BrowseParts.class);
                 browseCoolers.putExtra("type", "Mobos");
                 startActivity(browseCoolers);
             }
@@ -109,19 +108,9 @@ public class NewBuild extends AppCompatActivity {
 
     private void getParts(){
         try {
-            JSONObject cpu = new JSONObject(sharedPreferences.getString("temp_CPU", ""));
-            JSONObject cooler = new JSONObject(sharedPreferences.getString("temp_Cooler", ""));
-            JSONObject mobo = new JSONObject(sharedPreferences.getString("temp_Mobo", ""));
-            JSONObject memory = new JSONObject(sharedPreferences.getString("temp_Memory", ""));
-            JSONObject storage = new JSONObject(sharedPreferences.getString("temp_Storage", ""));
-            JSONObject gpu = new JSONObject(sharedPreferences.getString("temp_GPU", ""));
-            JSONObject pccase = new JSONObject(sharedPreferences.getString("temp_Case", ""));
-            JSONObject psu = new JSONObject(sharedPreferences.getString("temp_PSU", ""));
-            JSONObject casefan = new JSONObject(sharedPreferences.getString("temp_CaseFan", ""));
-
             //CPU
             if(cpu.has("brand")) {
-                Glide.with(NewBuild.this)
+                Glide.with(EditBuild.this)
                         .load(cpu.getString("img"))
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
                         .into(newBuildBinding.ivCpuImg);
@@ -150,6 +139,6 @@ public class NewBuild extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        startActivity(new Intent(NewBuild.this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+        startActivity(new Intent(EditBuild.this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
     }
 }
