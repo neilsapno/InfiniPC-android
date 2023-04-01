@@ -7,6 +7,7 @@ import android.os.StrictMode;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -14,8 +15,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
+import cedric.ciel.infinipc.Parts.*;
 import cedric.ciel.infinipc.Utils.DBHandler;
 import cedric.ciel.infinipc.databinding.ActivityEditBuildBinding;
 
@@ -24,27 +29,36 @@ public class EditBuild extends AppCompatActivity {
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     DBHandler dbHandler;
-    ActivityEditBuildBinding newBuildBinding;
+    ActivityEditBuildBinding editBuildBinding;
     private ImageView iv_cpuImg;
     private EditText et_buildName;
-    private String BuildName, CPU, Cooler, Mobo, Memory, Storage, GPU, Case, PSU, CaseFan, BuildImgUrl;
+    private String BuildName, sCPU, sCooler, sMobo, Memory, Storage, GPU, Case, PSU, CaseFan, BuildImgUrl;
     private int RAMCount, Watts;
     private double Price;
+    Boolean hasCPU, hasCooler, hasMobo, hasRAM, hasStorage = false;
+    ArrayList<CPU> cpu = new ArrayList<>();
+    ArrayList<Cooler> cooler = new ArrayList<>();
+    ArrayList<Motherboard> mobo = new ArrayList<>();
+    ArrayList<RAM> ram = new ArrayList<>();
+    ArrayList<Storage> storage = new ArrayList<>();
+
+    JSONObject jCpu, jcooler, jmobo, jram, jstorage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        newBuildBinding = ActivityEditBuildBinding.inflate(getLayoutInflater());
-        setContentView(newBuildBinding.getRoot());
+        editBuildBinding = ActivityEditBuildBinding.inflate(getLayoutInflater());
+        setContentView(editBuildBinding.getRoot());
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-        sharedPreferences = getSharedPreferences(this.getPackageName() +"Picked_Parts", MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences(getPackageName() + "Picked_Parts", MODE_PRIVATE);
         editor = sharedPreferences.edit();
+        String bName = sharedPreferences.getString("origBuild", null);
 
-
-        Intent update = getIntent();
+        if(sharedPreferences.getString("_bname", "").isEmpty()) editBuildBinding.etBuildName.setText(bName);
+        else editBuildBinding.etBuildName.setText(sharedPreferences.getString("_bname", null));
 
         FloatingActionButton btn_saveBuild = findViewById(R.id.btn_saveBuild);
 
@@ -53,24 +67,65 @@ public class EditBuild extends AppCompatActivity {
         btn_saveBuild.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                BuildName = newBuildBinding.etBuildName.getText().toString();
-                CPU = newBuildBinding.tvCpuName.getText().toString();
-                Cooler = "COoler";
-                Mobo = "MoBo";
-                Memory = "Memory";
-                Storage = "StorAge";
+                BuildName = editBuildBinding.etBuildName.getText().toString();
+                //CPU = editBuildBinding.tvCpuName.getText().toString();
+                try {
+                    jCpu = new JSONObject(sharedPreferences.getString("temp_CPU", ""));
+                    dbHandler.updateCPU(bName, BuildName, jCpu.getString("title"), jCpu.getString("brand"), jCpu.getString("model"), jCpu.getString("speed"), jCpu.getString("socketType"), jCpu.getString("link"), jCpu.getString("img"), jCpu.getDouble("price"));
+
+//                    if (hasCPU) {
+//                        dbHandler.updateCPU(bName, BuildName, jCpu.getString("title"), jCpu.getString("brand"), jCpu.getString("model"), jCpu.getString("speed"), jCpu.getString("socketType"), jCpu.getString("link"), jCpu.getString("img"), jCpu.getDouble("price"));
+//                    } else {
+//                        dbHandler.addCPU(BuildName, jCpu.getString("title"), jCpu.getString("brand"), jCpu.getString("model"), jCpu.getString("speed"), jCpu.getString("socketType"), jCpu.getString("link"), jCpu.getString("img"), jCpu.getDouble("price"));
+//                    }
+                } catch (JSONException e) {
+                    dbHandler.updateCPU(bName, BuildName);
+                }
+                sCPU = editBuildBinding.tvCpuName.getText().toString();;
+                try {
+                    jcooler = new JSONObject(sharedPreferences.getString("temp_Cooler", ""));
+                    dbHandler.updateCooler(bName, BuildName, jcooler.getString("title"), jcooler.getString("brand"), jcooler.getString("model"), jcooler.getString("rpm"), jcooler.getString("noiseLevel"), jcooler.getString("link"), jcooler.getString("img"), jcooler.getDouble("price"));
+                } catch (JSONException e) {
+                    dbHandler.updateCooler(bName, BuildName);
+                }
+                sCooler = editBuildBinding.tvCoolerName.getText().toString();
+                try {
+                    jmobo = new JSONObject(sharedPreferences.getString("temp_Mobo", ""));
+                    dbHandler.updateMotherboard(bName, BuildName, jmobo.getString("title"), jmobo.getString("model"), jmobo.getString("formFactor"), jmobo.getString("memorySlots"), jmobo.getString("socketType"),
+                            jmobo.getString("link"), jmobo.getString("img"), jmobo.getDouble("price"));
+                } catch (JSONException e) {
+                    dbHandler.updateMotherboard(bName, BuildName);
+                }
+                sMobo = editBuildBinding.tvMoboName.getText().toString();
+                try {
+                    jram = new JSONObject(sharedPreferences.getString("temp_RAM", ""));
+                    dbHandler.updateRAM(bName, BuildName, jram.getString("title"), jram.getString("model"), jram.getString("size"), jram.getString("quantity"), jram.getString("type"),
+                            jram.getString("link"), jram.getString("img"), jram.getDouble("price"));
+                    RAMCount = Integer.parseInt(jram.getString("size").replaceAll("[\\D]", ""));
+                } catch (JSONException e) {
+                    dbHandler.updateRAM(bName, BuildName);
+                    RAMCount = 0;
+                }
+                Memory = editBuildBinding.tvMemoryName.getText().toString();
+                try {
+                    jstorage = new JSONObject(sharedPreferences.getString("temp_Storage", ""));
+                    dbHandler.updateStorage(bName, BuildName, jstorage.getString("title"), jstorage.getString("model"), jstorage.getString("cacheMemory"), jstorage.getString("storageInterface"), jstorage.getString("type"),
+                            jstorage.getString("link"), jstorage.getString("img"), jstorage.getDouble("price"));
+                } catch (JSONException e) {
+                    dbHandler.updateStorage(bName, BuildName);
+                }
+                Storage = editBuildBinding.tvStorageName.getText().toString();
                 GPU = "VCard";
                 Case = "PC Case";
                 PSU = "PSupply";
                 CaseFan = "CaseFan";
-                RAMCount = 8;
                 Watts = 500;
                 Price = 600.00;
                 BuildImgUrl = "https://";
 
-                dbHandler.addEditBuild(BuildName, CPU, Cooler, Mobo, Memory, Storage, GPU, Case, PSU, CaseFan, RAMCount, Watts, Price, BuildImgUrl);
+                dbHandler.editBuild(bName, BuildName, sCPU, sCooler, sMobo, Memory, Storage, GPU, Case, PSU, CaseFan, RAMCount, Watts, Price, BuildImgUrl);
                 dbHandler.close();
-                Intent builds = new Intent(EditBuild.this, MainActivity.class);
+                Intent builds = new Intent(EditBuild.this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(builds);
             }
         });
@@ -79,61 +134,222 @@ public class EditBuild extends AppCompatActivity {
     }
 
     private void partsSelector() {
-        newBuildBinding.cvCpu.setOnClickListener(new View.OnClickListener() {
+        editBuildBinding.cvCpu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent browseCPU = new Intent(EditBuild.this, BrowseParts.class);
+                editor.putString("_bname", editBuildBinding.etBuildName.getText().toString());
+                editor.apply();
                 browseCPU.putExtra("type", "CPU");
+                browseCPU.putExtra("from", "edit");
                 startActivity(browseCPU);
             }
         });
-        newBuildBinding.cvCpuCooler.setOnClickListener(new View.OnClickListener() {
+        editBuildBinding.cvCpuCooler.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent browseCoolers = new Intent(EditBuild.this, BrowseParts.class);
+                editor.putString("_bname", editBuildBinding.etBuildName.getText().toString());
+                editor.apply();
                 browseCoolers.putExtra("type", "Coolers");
+                browseCoolers.putExtra("from", "edit");
                 startActivity(browseCoolers);
             }
         });
-        newBuildBinding.cvMobo.setOnClickListener(new View.OnClickListener() {
+        editBuildBinding.cvMobo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent browseCoolers = new Intent(EditBuild.this, BrowseParts.class);
-                browseCoolers.putExtra("type", "Mobos");
-                startActivity(browseCoolers);
+                Intent browseMobos = new Intent(EditBuild.this, BrowseParts.class);
+                editor.putString("_bname", editBuildBinding.etBuildName.getText().toString());
+                editor.apply();
+                browseMobos.putExtra("type", "Mobos");
+                browseMobos.putExtra("from", "edit");
+                startActivity(browseMobos);
             }
         });
-
+        editBuildBinding.cvMemory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent browseMemory = new Intent(EditBuild.this, BrowseParts.class);
+                editor.putString("_bname", editBuildBinding.etBuildName.getText().toString());
+                editor.apply();
+                browseMemory.putExtra("type", "RAMs");
+                browseMemory.putExtra("from", "edit");
+                startActivity(browseMemory);
+            }
+        });
+        editBuildBinding.cvStorage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent browseMemory = new Intent(EditBuild.this, BrowseParts.class);
+                editor.putString("_bname", editBuildBinding.etBuildName.getText().toString());
+                editor.apply();
+                browseMemory.putExtra("type", "Storages");
+                browseMemory.putExtra("from", "edit");
+                startActivity(browseMemory);
+            }
+        });
     }
 
-    private void getParts(){
+    private void getParts() {
+        cpu = dbHandler.getCPU(cpu, editBuildBinding.etBuildName.getText().toString());
+        cooler = dbHandler.getCooler(cooler, editBuildBinding.etBuildName.getText().toString());
+        mobo = dbHandler.getMobo(mobo, editBuildBinding.etBuildName.getText().toString());
+        ram = dbHandler.getRAM(ram, editBuildBinding.etBuildName.getText().toString());
+        storage = dbHandler.getStorage(storage, editBuildBinding.etBuildName.getText().toString());
+
         try {
             //CPU
-            if(cpu.has("brand")) {
-                Glide.with(EditBuild.this)
-                        .load(cpu.getString("img"))
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .into(newBuildBinding.ivCpuImg);
-                newBuildBinding.tvCpuName.setText(cpu.getString("title"));
-                newBuildBinding.tvCpuBrand.setText("Brand: " + cpu.getString("brand"));
-                newBuildBinding.tvCpuModel.setText("Model: " + cpu.getString("model"));
-                newBuildBinding.tvCpuSpeed.setText("Speed: " + cpu.getString("speed"));
-                newBuildBinding.tvCpuSocket.setText("Socket: " + cpu.getString("socketType"));
-                newBuildBinding.tvCpuPrice.setText("$" + cpu.getDouble("price"));
-            }
-
-            //Cooler
-        }
-        catch (Exception e){
+            jCpu = new JSONObject(sharedPreferences.getString("temp_CPU", ""));
+            Glide.with(EditBuild.this).load(jCpu.getString("img")).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivCpuImg);
+            editBuildBinding.tvCpuName.setText(jCpu.getString("title"));
+            editBuildBinding.tvCpuBrand.setText("Brand: " + jCpu.getString("brand"));
+            editBuildBinding.tvCpuModel.setText("Model: " + jCpu.getString("model"));
+            editBuildBinding.tvCpuSpeed.setText("Speed: " + jCpu.getString("speed"));
+            editBuildBinding.tvCpuSocket.setText("Socket: " + jCpu.getString("socketType"));
+            editBuildBinding.tvCpuPrice.setText("$" + jCpu.getDouble("price"));
+            Toast.makeText(this, "has json", Toast.LENGTH_SHORT).show();
+            hasCPU = true;
+        } catch (JSONException e) {
             //return;
+            if (!cpu.isEmpty()) {
+                Glide.with(EditBuild.this).load(cpu.get(0).getImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivCpuImg);
+                editBuildBinding.tvCpuName.setText(cpu.get(0).getTitle());
+                editBuildBinding.tvCpuBrand.setText("Brand: " + cpu.get(0).getBrand());
+                editBuildBinding.tvCpuModel.setText("Model: " + cpu.get(0).getModel());
+                editBuildBinding.tvCpuSpeed.setText("Speed: " + cpu.get(0).getSpeed());
+                editBuildBinding.tvCpuSocket.setText("Socket: " + cpu.get(0).getSocket());
+                editBuildBinding.tvCpuPrice.setText("$" + cpu.get(0).getPrice());
+                Toast.makeText(this, "no json", Toast.LENGTH_SHORT).show();
+                hasCPU = true;
+            } else {
+                hasCPU = false;
+            }
+        }
+        try {
+            //Cooler
+            jcooler = new JSONObject(sharedPreferences.getString("temp_Cooler", ""));
+            Glide.with(EditBuild.this)
+                    .load(jcooler.getString("img"))
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(editBuildBinding.ivCoolerImg);
+            editBuildBinding.tvCoolerName.setText(jcooler.getString("title"));
+            editBuildBinding.tvCoolerBrand.setText("Brand: " + jcooler.getString("brand"));
+            editBuildBinding.tvCoolerModel.setText("Model: " + jcooler.getString("model"));
+            editBuildBinding.tvCoolerRpm.setText("RPM: " + jcooler.getString("rpm"));
+            editBuildBinding.tvCoolerNoiseLvl.setText("Noise Level: " + jcooler.getString("noiseLevel"));
+            editBuildBinding.tvCoolerPrice.setText("$" + jcooler.getDouble("price"));
+            hasCooler = true;
+        } catch (JSONException e) {
+            if (!cooler.isEmpty()) {
+                Glide.with(EditBuild.this).load(cooler.get(0).getImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivCoolerImg);
+                editBuildBinding.tvCoolerName.setText(cooler.get(0).getTitle());
+                editBuildBinding.tvCoolerBrand.setText("Brand: " + cooler.get(0).getBrand());
+                editBuildBinding.tvCoolerModel.setText("Model: " + cooler.get(0).getModel());
+                editBuildBinding.tvCoolerRpm.setText("RPM: " + cooler.get(0).getrpm());
+                editBuildBinding.tvCoolerNoiseLvl.setText("Noise Level: " + cooler.get(0).getnoiseLvl());
+                editBuildBinding.tvCpuPrice.setText("$" + cooler.get(0).getPrice());
+                Toast.makeText(this, cooler.get(0).getImg(), Toast.LENGTH_SHORT).show();
+                hasCooler = true;
+            } else {
+                hasCooler = false;
+            }
+        }
+        try {
+            //Mobo
+            jmobo = new JSONObject(sharedPreferences.getString("temp_Mobo", ""));
+            Glide.with(EditBuild.this)
+                    .load(jmobo.getString("img"))
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(editBuildBinding.ivMoboImg);
+            editBuildBinding.tvMoboName.setText(jmobo.getString("title"));
+            editBuildBinding.tvMoboModel.setText("Model: " + jmobo.getString("brand"));
+            editBuildBinding.tvMoboForm.setText("Form: " + jmobo.getString("formFactor"));
+            editBuildBinding.tvMoboRamslot.setText("Memory Slots: " + jmobo.getString("memorySlots"));
+            editBuildBinding.tvMoboSocket.setText("Socket: " + jmobo.getString("socketType"));
+            editBuildBinding.tvMoboPrice.setText("$" + jmobo.getDouble("price"));
+            hasMobo = true;
+        } catch (JSONException e) {
+            if (!mobo.isEmpty()) {
+                Glide.with(EditBuild.this).load(mobo.get(0).getImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivMoboImg);
+                editBuildBinding.tvMoboName.setText(mobo.get(0).getTitle());
+                editBuildBinding.tvMoboModel.setText("Brand: " + mobo.get(0).getModel());
+                editBuildBinding.tvMoboForm.setText("Model: " + mobo.get(0).getForm());
+                editBuildBinding.tvMoboRamslot.setText("RPM: " + mobo.get(0).getRamslot());
+                editBuildBinding.tvMoboSocket.setText("Noise Level: " + mobo.get(0).getSocket());
+                editBuildBinding.tvMoboPrice.setText("$" + mobo.get(0).getPrice());
+                Toast.makeText(this, "no json", Toast.LENGTH_SHORT).show();
+                hasMobo = true;
+            } else {
+                hasMobo = false;
+            }
+        }
+        try {
+            //Mobo
+            jram = new JSONObject(sharedPreferences.getString("temp_RAM", ""));
+            Glide.with(EditBuild.this)
+                    .load(jram.getString("img"))
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(editBuildBinding.ivMemoryImg);
+            editBuildBinding.tvMemoryName.setText(jram.getString("title"));
+            editBuildBinding.tvMemoryModel.setText("Model: " + jram.getString("model"));
+            editBuildBinding.tvMemorySize.setText("Size: " + jram.getString("size"));
+            editBuildBinding.tvMemoryQty.setText("Quantity: " + jram.getString("quantity"));
+            editBuildBinding.tvMemoryType.setText("Type: " + jram.getString("type"));
+            editBuildBinding.tvMemoryPrice.setText("$" + jram.getDouble("price"));
+            hasRAM = true;
+        } catch (JSONException e) {
+            if (!ram.isEmpty()) {
+                Glide.with(EditBuild.this).load(ram.get(0).getImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivMemoryImg);
+                editBuildBinding.tvMemoryName.setText(ram.get(0).getTitle());
+                editBuildBinding.tvMemoryModel.setText("Brand: " + ram.get(0).getModel());
+                editBuildBinding.tvMemorySize.setText("Model: " + ram.get(0).getSize());
+                editBuildBinding.tvMemoryQty.setText("RPM: " + ram.get(0).getQuantity());
+                editBuildBinding.tvMemoryType.setText("Noise Level: " + ram.get(0).getType());
+                editBuildBinding.tvMemoryPrice.setText("$" + ram.get(0).getPrice());
+                Toast.makeText(this, "no json", Toast.LENGTH_SHORT).show();
+                hasRAM = true;
+            } else {
+                hasRAM = false;
+            }
+        }
+        try {
+            //Mobo
+            jstorage = new JSONObject(sharedPreferences.getString("temp_Storage", ""));
+            Glide.with(EditBuild.this)
+                    .load(jstorage.getString("img"))
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(editBuildBinding.ivStorageImg);
+            editBuildBinding.tvStorageName.setText(jstorage.getString("title"));
+            editBuildBinding.tvStorageModel.setText("Model: " + jstorage.getString("brand"));
+            editBuildBinding.tvStorageCachesize.setText("Cache Memory Size: " + jstorage.getString("cacheMemory"));
+            editBuildBinding.tvStorageInterface.setText("Interface: " + jstorage.getString("storageInterface"));
+            editBuildBinding.tvStorageType.setText("Type: " + jstorage.getString("type"));
+            editBuildBinding.tvStoragePrice.setText("$" + jstorage.getDouble("price"));
+            hasStorage = true;
+        } catch (JSONException e) {
+            if (!storage.isEmpty()) {
+                Glide.with(EditBuild.this).load(storage.get(0).getImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivStorageImg);
+                editBuildBinding.tvStorageName.setText(storage.get(0).getTitle());
+                editBuildBinding.tvStorageModel.setText("Model: " + storage.get(0).getModel());
+                editBuildBinding.tvStorageCachesize.setText("Cache Memory Size: " + storage.get(0).getCacheSize());
+                editBuildBinding.tvStorageInterface.setText("Interface: " + storage.get(0).getInterface());
+                editBuildBinding.tvStorageType.setText("Type: " + storage.get(0).getType());
+                editBuildBinding.tvStoragePrice.setText("$" + storage.get(0).getPrice());
+                Toast.makeText(this, "no json", Toast.LENGTH_SHORT).show();
+                hasStorage = true;
+            } else {
+                hasStorage = false;
+            }
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        editor.remove("temp_CPU");
-        editor.apply();
+//        editor.remove("temp_CPU");
+//        editor.apply();
+        dbHandler.close();
     }
 
     @Override

@@ -1,17 +1,17 @@
 package cedric.ciel.infinipc.Parts;
 
-public class CPU {
+public class Storage {
 
-    String buildName, title, brand, model, speed, socket, link, img;
+    String buildName, title, model, cacheSize, Interface, type, link, img;
     double price;
 
-    public CPU(String buildName, String title, String brand, String model, String speed, String socket, String link, String img, double price) {
+    public Storage(String buildName, String title, String model, String cacheSize, String Interface, String type, String link, String img, double price) {
         this.buildName = buildName;
         this.title = title;
-        this.brand = brand;
         this.model = model;
-        this.speed = speed;
-        this.socket = socket;
+        this.cacheSize = cacheSize;
+        this.Interface = Interface;
+        this.type = type;
         this.link = link;
         this.img = img;
         this.price = price;
@@ -33,14 +33,6 @@ public class CPU {
         this.title = title;
     }
 
-    public String getBrand() {
-        return brand;
-    }
-
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
-
     public String getModel() {
         return model;
     }
@@ -49,20 +41,28 @@ public class CPU {
         this.model = model;
     }
 
-    public String getSpeed() {
-        return speed;
+    public String getCacheSize() {
+        return cacheSize;
     }
 
-    public void setSpeed(String speed) {
-        this.speed = speed;
+    public void setCacheSize(String brand) {
+        this.cacheSize = cacheSize;
     }
 
-    public String getSocket() {
-        return socket;
+    public String getInterface() {
+        return Interface;
     }
 
-    public void setSocket(String socket) {
-        this.socket = socket;
+    public void setInterface(String speed) {
+        this.Interface = Interface;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String socket) {
+        this.type = type;
     }
 
     public double getPrice() {

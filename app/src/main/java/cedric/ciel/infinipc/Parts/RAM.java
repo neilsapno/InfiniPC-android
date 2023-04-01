@@ -1,17 +1,17 @@
 package cedric.ciel.infinipc.Parts;
 
-public class CPU {
+public class RAM {
 
-    String buildName, title, brand, model, speed, socket, link, img;
+    String buildName, title, model, size, quantity, type, link, img;
     double price;
 
-    public CPU(String buildName, String title, String brand, String model, String speed, String socket, String link, String img, double price) {
+    public RAM(String buildName, String title, String model, String size, String quantity, String type, String link, String img, double price) {
         this.buildName = buildName;
         this.title = title;
-        this.brand = brand;
         this.model = model;
-        this.speed = speed;
-        this.socket = socket;
+        this.size = size;
+        this.quantity = quantity;
+        this.type = type;
         this.link = link;
         this.img = img;
         this.price = price;
@@ -33,14 +33,6 @@ public class CPU {
         this.title = title;
     }
 
-    public String getBrand() {
-        return brand;
-    }
-
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
-
     public String getModel() {
         return model;
     }
@@ -49,20 +41,28 @@ public class CPU {
         this.model = model;
     }
 
-    public String getSpeed() {
-        return speed;
+    public String getSize() {
+        return size;
     }
 
-    public void setSpeed(String speed) {
-        this.speed = speed;
+    public void setSize(String brand) {
+        this.size = size;
     }
 
-    public String getSocket() {
-        return socket;
+    public String getQuantity() {
+        return quantity;
     }
 
-    public void setSocket(String socket) {
-        this.socket = socket;
+    public void setQuantity(String speed) {
+        this.quantity = quantity;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String socket) {
+        this.type = type;
     }
 
     public double getPrice() {

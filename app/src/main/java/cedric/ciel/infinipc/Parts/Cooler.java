@@ -1,17 +1,17 @@
 package cedric.ciel.infinipc.Parts;
 
-public class CPU {
+public class Cooler {
 
-    String buildName, title, brand, model, speed, socket, link, img;
+    String buildName, title, brand, model, rpm, noiseLvl, link, img;
     double price;
 
-    public CPU(String buildName, String title, String brand, String model, String speed, String socket, String link, String img, double price) {
+    public Cooler(String buildName, String title, String brand, String model, String rpm, String noiseLvl, String link, String img, double price) {
         this.buildName = buildName;
         this.title = title;
         this.brand = brand;
         this.model = model;
-        this.speed = speed;
-        this.socket = socket;
+        this.rpm = rpm;
+        this.noiseLvl = noiseLvl;
         this.link = link;
         this.img = img;
         this.price = price;
@@ -49,20 +49,20 @@ public class CPU {
         this.model = model;
     }
 
-    public String getSpeed() {
-        return speed;
+    public String getrpm() {
+        return rpm;
     }
 
-    public void setSpeed(String speed) {
-        this.speed = speed;
+    public void setrpm(String rpm) {
+        this.rpm = rpm;
     }
 
-    public String getSocket() {
-        return socket;
+    public String getnoiseLvl() {
+        return noiseLvl;
     }
 
-    public void setSocket(String socket) {
-        this.socket = socket;
+    public void setnoiseLvl(String noiseLvl) {
+        this.noiseLvl = noiseLvl;
     }
 
     public double getPrice() {

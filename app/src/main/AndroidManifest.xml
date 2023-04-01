@@ -22,9 +22,6 @@
             android:name=".BrowseParts"
             android:exported="false" />
         <activity
-            android:name=".PartsList"
-            android:exported="false" />
-        <activity
             android:name=".NewBuild"
             android:exported="false" />
         <activity

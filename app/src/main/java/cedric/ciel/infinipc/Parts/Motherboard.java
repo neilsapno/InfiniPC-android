@@ -1,16 +1,16 @@
 package cedric.ciel.infinipc.Parts;
 
-public class CPU {
+public class Motherboard {
 
-    String buildName, title, brand, model, speed, socket, link, img;
+    String buildName, title, model, form, ramslot,socket, link, img;
     double price;
 
-    public CPU(String buildName, String title, String brand, String model, String speed, String socket, String link, String img, double price) {
+    public Motherboard(String buildName, String title, String model, String form, String ramslot, String socket,String link, String img, double price) {
         this.buildName = buildName;
         this.title = title;
-        this.brand = brand;
         this.model = model;
-        this.speed = speed;
+        this.form = form;
+        this.ramslot = ramslot;
         this.socket = socket;
         this.link = link;
         this.img = img;
@@ -33,12 +33,12 @@ public class CPU {
         this.title = title;
     }
 
-    public String getBrand() {
-        return brand;
+    public String getForm() {
+        return form;
     }
 
-    public void setBrand(String brand) {
-        this.brand = brand;
+    public void setForm(String brand) {
+        this.form = form;
     }
 
     public String getModel() {
@@ -49,12 +49,13 @@ public class CPU {
         this.model = model;
     }
 
-    public String getSpeed() {
-        return speed;
+
+    public String getRamslot() {
+        return ramslot;
     }
 
-    public void setSpeed(String speed) {
-        this.speed = speed;
+    public void setRamslot(String speed) {
+        this.ramslot = ramslot;
     }
 
     public String getSocket() {

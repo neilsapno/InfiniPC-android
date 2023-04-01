@@ -15,16 +15,18 @@ import cedric.ciel.infinipc.R;
 public class BuildListAdapter extends RecyclerView.Adapter<BuildListAdapter.ViewHolder> {
     private ArrayList<BuildData> mbuildData = new ArrayList<>();
     private Context mContext;
+    OnBuildClickListener onBuildClickListener;
 
-    public BuildListAdapter(Context context, ArrayList<BuildData> buildData) {
+    public BuildListAdapter(Context context, ArrayList<BuildData> buildData, OnBuildClickListener onBuildClickListener) {
         mContext = context;
         mbuildData = buildData;
+        this.onBuildClickListener = onBuildClickListener;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_build, parent, false);
-        ViewHolder viewHolder = new ViewHolder(view);
+        ViewHolder viewHolder = new ViewHolder(view, this.onBuildClickListener);
         return viewHolder;
     }
 
@@ -41,22 +43,35 @@ public class BuildListAdapter extends RecyclerView.Adapter<BuildListAdapter.View
         holder.tv_Price.setText("Est Price: $"+buildData.getEst_price());
     }
 
+    public interface OnBuildClickListener{
+        void onBuildClick(int position, String buildname);
+    }
+
     @Override
     public int getItemCount() {
         return mbuildData.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
+        OnBuildClickListener onBuildClickListener;
         private TextView tv_bName, tv_CPU, tv_Memory, tv_Watts, tv_Price;
 
-        public ViewHolder(View itemView) {
+        public ViewHolder(View itemView, OnBuildClickListener onBuildClickListener) {
             super(itemView);
             tv_bName = itemView.findViewById(R.id.tv_bName);
             tv_CPU = itemView.findViewById(R.id.tv_cpu);
             tv_Memory = itemView.findViewById(R.id.tv_ram);
             tv_Watts = itemView.findViewById(R.id.tv_watts);
             tv_Price = itemView.findViewById(R.id.tv_estPrice);
+
+            itemView.setOnClickListener(this);
+            this.onBuildClickListener = onBuildClickListener;
+        }
+
+        @Override
+        public void onClick(View view) {
+            this.onBuildClickListener.onBuildClick(getAdapterPosition(), tv_bName.getText().toString());
         }
     }
 }
