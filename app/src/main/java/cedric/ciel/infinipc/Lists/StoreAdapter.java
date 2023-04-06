@@ -4,6 +4,8 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,14 +18,16 @@ import java.util.ArrayList;
 
 import cedric.ciel.infinipc.R;
 
-public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> {
-    private ArrayList<StoreParts> mstoreParts = new ArrayList<>();
+public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> implements Filterable {
+    private ArrayList<StoreParts> mstoreParts;
+    private ArrayList<StoreParts> filteredParts;
     private Context mContext;
     private OnPartClickListener onPartClickListener;
 
     public StoreAdapter(Context context, ArrayList<StoreParts> storeParts, OnPartClickListener onPartClickListener) {
-        mContext = context;
-        mstoreParts = storeParts;
+        this.mContext = context;
+        this.filteredParts = storeParts;
+        this.mstoreParts = new ArrayList<>(storeParts);
         this.onPartClickListener = onPartClickListener;
     }
 
@@ -61,6 +65,42 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     public int getItemCount() {
         return mstoreParts.size();
     }
+
+    @Override
+    public Filter getFilter() {
+        return partsFilter;
+    }
+
+    private Filter partsFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            ArrayList<StoreParts> filteredList = new ArrayList<>();
+
+            if (constraint == null || constraint.length() == 0) {
+                filteredList.addAll(mstoreParts);
+            } else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+
+                for (StoreParts item : filteredParts) {
+                    if (item.getTv_partsTitle().toLowerCase().contains(filterPattern)) {
+                        filteredList.add(item);
+                    }
+                }
+            }
+
+            FilterResults results = new FilterResults();
+            results.values = filteredList;
+
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            mstoreParts.clear();
+            mstoreParts.addAll((ArrayList) results.values);
+            notifyDataSetChanged();
+        }
+    };
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 

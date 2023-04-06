@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId "cedric.ciel.infinipc"
-        minSdk 28
+        minSdk 24
         targetSdk 33
         versionCode 1
         versionName "1.0"
@@ -23,6 +23,7 @@ android {
     buildTypes {
         release {
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

@@ -20,7 +20,7 @@
             android:background="?attr/colorPrimary"
             android:minHeight="?attr/actionBarSize"
             android:theme="?attr/actionBarTheme"
-            app:title="Create New Build" />
+            app:title="Edit Build" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout

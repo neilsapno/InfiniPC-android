@@ -3,8 +3,13 @@ package cedric.ciel.infinipc;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -41,19 +46,22 @@ public class BrowseParts extends AppCompatActivity implements StoreAdapter.OnPar
         setContentView(R.layout.activity_browse_parts);
 
         store_coordinator = findViewById(R.id.store_coordinator);
-        recyclerView=findViewById(R.id.availableParts);
-        sharedPreferences = getSharedPreferences(this.getPackageName() +"Parts", MODE_PRIVATE);
-        sharedPreferences1 = getSharedPreferences(this.getPackageName() +"Picked_Parts", MODE_PRIVATE);
+        recyclerView = findViewById(R.id.availableParts);
+        sharedPreferences = getSharedPreferences(this.getPackageName() + "Parts", MODE_PRIVATE);
+        sharedPreferences1 = getSharedPreferences(this.getPackageName() + "Picked_Parts", MODE_PRIVATE);
 
         editor = sharedPreferences1.edit();
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         storeParts = new ArrayList<>();
 
+        Toolbar tb = findViewById(R.id.toolbar);
+        setSupportActionBar(tb);
+
         Intent type = getIntent();
         typePart = type.getStringExtra("type");
         fromActivity = type.getStringExtra("from");
-        if(typePart.equals("CPU")) {
+        if (typePart.equals("CPU")) {
             //StoreParts(String img_url, String tv_partsTitle, String tv_partsInfo1, String tv_partsInfo2, String tv_partsInfo3, String tv_partsInfo4, String partsID, String link, double tv_partsPrice)
             try {
                 JSONArray jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "processors", ""));
@@ -69,8 +77,7 @@ public class BrowseParts extends AppCompatActivity implements StoreAdapter.OnPar
                 e.printStackTrace();
                 Snackbar.make(store_coordinator, "Something went wrong while getting parts list", Snackbar.LENGTH_LONG).show();
             }
-        }
-        else if(typePart.equals("Coolers")) {
+        } else if (typePart.equals("Coolers")) {
             //StoreParts(String img_url, String tv_partsTitle, String tv_partsInfo1, String tv_partsInfo2, String tv_partsInfo3, String tv_partsInfo4, String partsID, String link, double tv_partsPrice)
             try {
                 JSONArray jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "coolers", ""));
@@ -85,15 +92,14 @@ public class BrowseParts extends AppCompatActivity implements StoreAdapter.OnPar
                 e.printStackTrace();
                 Snackbar.make(store_coordinator, "Something went wrong while getting parts list", Snackbar.LENGTH_LONG).show();
             }
-        }
-        else if(typePart.equals("Mobos")) {
+        } else if (typePart.equals("Mobos")) {
             //StoreParts(String img_url, String tv_partsTitle, String tv_partsInfo1, String tv_partsInfo2, String tv_partsInfo3, String tv_partsInfo4, String partsID, String link, double tv_partsPrice)
             try {
                 JSONArray jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "mobos", ""));
 //                Toast.makeText(this, "" + jsonArray.length(), Toast.LENGTH_SHORT).show();
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject json = jsonArray.getJSONObject(i);
-                    storeParts.add(new StoreParts(json.getString("img"), json.getString("title"), json.getString("brand")+" "+json.getString("model"), json.getString("formFactor"), json.getString("memorySlots"), json.getString("socketType"), json.getString("id"), json.getString("link"), json.getDouble("price")));
+                    storeParts.add(new StoreParts(json.getString("img"), json.getString("title"), json.getString("brand") + " " + json.getString("model"), json.getString("formFactor"), json.getString("memorySlots"), json.getString("socketType"), json.getString("id"), json.getString("link"), json.getDouble("price")));
                     //Log.d("JSON get", "json: " + json);
                     Snackbar.make(store_coordinator, "Motherboards Loaded", Snackbar.LENGTH_SHORT).show();
                 }
@@ -101,15 +107,14 @@ public class BrowseParts extends AppCompatActivity implements StoreAdapter.OnPar
                 e.printStackTrace();
                 Snackbar.make(store_coordinator, "Something went wrong while getting parts list", Snackbar.LENGTH_LONG).show();
             }
-        }
-        else if(typePart.equals("RAMs")) {
+        } else if (typePart.equals("RAMs")) {
             //StoreParts(String img_url, String tv_partsTitle, String tv_partsInfo1, String tv_partsInfo2, String tv_partsInfo3, String tv_partsInfo4, String partsID, String link, double tv_partsPrice)
             try {
                 JSONArray jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "rams", ""));
 //                Toast.makeText(this, "" + jsonArray.length(), Toast.LENGTH_SHORT).show();
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject json = jsonArray.getJSONObject(i);
-                    storeParts.add(new StoreParts(json.getString("img"), json.getString("title"), json.getString("brand")+" "+json.getString("model"), json.getString("size"), json.getString("quantity"), json.getString("type"), json.getString("id"), json.getString("link"), json.getDouble("price")));
+                    storeParts.add(new StoreParts(json.getString("img"), json.getString("title"), json.getString("brand") + " " + json.getString("model"), json.getString("size"), json.getString("quantity"), json.getString("type"), json.getString("id"), json.getString("link"), json.getDouble("price")));
                     //Log.d("JSON get", "json: " + json);
                     Snackbar.make(store_coordinator, "RAMs Loaded", Snackbar.LENGTH_SHORT).show();
                 }
@@ -117,15 +122,14 @@ public class BrowseParts extends AppCompatActivity implements StoreAdapter.OnPar
                 e.printStackTrace();
                 Snackbar.make(store_coordinator, "Something went wrong while getting parts list", Snackbar.LENGTH_LONG).show();
             }
-        }
-        else if(typePart.equals("Storages")) {
+        } else if (typePart.equals("Storages")) {
             //StoreParts(String img_url, String tv_partsTitle, String tv_partsInfo1, String tv_partsInfo2, String tv_partsInfo3, String tv_partsInfo4, String partsID, String link, double tv_partsPrice)
             try {
                 JSONArray jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "storages", ""));
 //                Toast.makeText(this, "" + jsonArray.length(), Toast.LENGTH_SHORT).show();
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject json = jsonArray.getJSONObject(i);
-                    storeParts.add(new StoreParts(json.getString("img"), json.getString("title"), json.getString("brand")+" "+json.getString("model"), json.getString("cacheMemory"), json.getString("storageInterface"), json.getString("type"), json.getString("id"), json.getString("link"), json.getDouble("price")));
+                    storeParts.add(new StoreParts(json.getString("img"), json.getString("title"), json.getString("brand") + " " + json.getString("model"), json.getString("cacheMemory"), json.getString("storageInterface"), json.getString("type"), json.getString("id"), json.getString("link"), json.getDouble("price")));
                     //Log.d("JSON get", "json: " + json);
                     Snackbar.make(store_coordinator, "RAMs Loaded", Snackbar.LENGTH_SHORT).show();
                 }
@@ -135,9 +139,10 @@ public class BrowseParts extends AppCompatActivity implements StoreAdapter.OnPar
             }
         }
 
-
+        adapter = new StoreAdapter(this, storeParts, this);
         mAdapter = new StoreAdapter(this, storeParts, this);
-        recyclerView.setAdapter(mAdapter);
+        recyclerView.setAdapter(adapter);
+
     }
 
     @Override
@@ -196,5 +201,37 @@ public class BrowseParts extends AppCompatActivity implements StoreAdapter.OnPar
             Snackbar.make(store_coordinator, "Something went wrong while getting parts list", Snackbar.LENGTH_LONG).show();
         }
         return "";
+    }
+
+    // calling on create option menu
+    // layout to inflate our menu file.
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // below line is to get our inflater
+        MenuInflater inflater = getMenuInflater();
+
+        // inside inflater we are inflating our menu file.
+        inflater.inflate(R.menu.browse_menu, menu);
+
+        // below line is to get our menu item.
+        MenuItem searchItem = menu.findItem(R.id.actionSearch);
+
+        // getting search view of our item.
+        SearchView searchView = (SearchView) searchItem.getActionView();
+
+        // below line is to call set on query text listener method.
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.getFilter().filter(newText);
+                return false;
+            }
+        });
+        return true;
     }
 }

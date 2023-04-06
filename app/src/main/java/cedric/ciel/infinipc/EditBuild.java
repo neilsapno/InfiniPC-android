@@ -7,7 +7,6 @@ import android.os.StrictMode;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -20,7 +19,11 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import cedric.ciel.infinipc.Parts.*;
+import cedric.ciel.infinipc.Parts.CPU;
+import cedric.ciel.infinipc.Parts.Cooler;
+import cedric.ciel.infinipc.Parts.Motherboard;
+import cedric.ciel.infinipc.Parts.RAM;
+import cedric.ciel.infinipc.Parts.Storage;
 import cedric.ciel.infinipc.Utils.DBHandler;
 import cedric.ciel.infinipc.databinding.ActivityEditBuildBinding;
 
@@ -208,7 +211,7 @@ public class EditBuild extends AppCompatActivity {
             editBuildBinding.tvCpuSpeed.setText("Speed: " + jCpu.getString("speed"));
             editBuildBinding.tvCpuSocket.setText("Socket: " + jCpu.getString("socketType"));
             editBuildBinding.tvCpuPrice.setText("$" + jCpu.getDouble("price"));
-            Toast.makeText(this, "has json", Toast.LENGTH_SHORT).show();
+            
             hasCPU = true;
         } catch (JSONException e) {
             //return;
@@ -220,7 +223,7 @@ public class EditBuild extends AppCompatActivity {
                 editBuildBinding.tvCpuSpeed.setText("Speed: " + cpu.get(0).getSpeed());
                 editBuildBinding.tvCpuSocket.setText("Socket: " + cpu.get(0).getSocket());
                 editBuildBinding.tvCpuPrice.setText("$" + cpu.get(0).getPrice());
-                Toast.makeText(this, "no json", Toast.LENGTH_SHORT).show();
+                
                 hasCPU = true;
             } else {
                 hasCPU = false;
@@ -249,7 +252,7 @@ public class EditBuild extends AppCompatActivity {
                 editBuildBinding.tvCoolerRpm.setText("RPM: " + cooler.get(0).getrpm());
                 editBuildBinding.tvCoolerNoiseLvl.setText("Noise Level: " + cooler.get(0).getnoiseLvl());
                 editBuildBinding.tvCpuPrice.setText("$" + cooler.get(0).getPrice());
-                Toast.makeText(this, cooler.get(0).getImg(), Toast.LENGTH_SHORT).show();
+
                 hasCooler = true;
             } else {
                 hasCooler = false;
@@ -278,7 +281,7 @@ public class EditBuild extends AppCompatActivity {
                 editBuildBinding.tvMoboRamslot.setText("RPM: " + mobo.get(0).getRamslot());
                 editBuildBinding.tvMoboSocket.setText("Noise Level: " + mobo.get(0).getSocket());
                 editBuildBinding.tvMoboPrice.setText("$" + mobo.get(0).getPrice());
-                Toast.makeText(this, "no json", Toast.LENGTH_SHORT).show();
+                
                 hasMobo = true;
             } else {
                 hasMobo = false;
@@ -307,7 +310,7 @@ public class EditBuild extends AppCompatActivity {
                 editBuildBinding.tvMemoryQty.setText("RPM: " + ram.get(0).getQuantity());
                 editBuildBinding.tvMemoryType.setText("Noise Level: " + ram.get(0).getType());
                 editBuildBinding.tvMemoryPrice.setText("$" + ram.get(0).getPrice());
-                Toast.makeText(this, "no json", Toast.LENGTH_SHORT).show();
+                
                 hasRAM = true;
             } else {
                 hasRAM = false;
@@ -336,7 +339,7 @@ public class EditBuild extends AppCompatActivity {
                 editBuildBinding.tvStorageInterface.setText("Interface: " + storage.get(0).getInterface());
                 editBuildBinding.tvStorageType.setText("Type: " + storage.get(0).getType());
                 editBuildBinding.tvStoragePrice.setText("$" + storage.get(0).getPrice());
-                Toast.makeText(this, "no json", Toast.LENGTH_SHORT).show();
+                
                 hasStorage = true;
             } else {
                 hasStorage = false;
