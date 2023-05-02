@@ -1,5 +1,7 @@
 package cedric.ciel.infinipc;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -7,6 +9,7 @@ import android.os.StrictMode;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -104,12 +107,12 @@ public class EditBuild extends AppCompatActivity {
                     jram = new JSONObject(sharedPreferences.getString("temp_RAM", ""));
                     dbHandler.updateRAM(bName, BuildName, jram.getString("title"), jram.getString("model"), jram.getString("size"), jram.getString("quantity"), jram.getString("type"),
                             jram.getString("link"), jram.getString("img"), jram.getDouble("price"));
-                    RAMCount = Integer.parseInt(jram.getString("size").replaceAll("[\\D]", ""));
                 } catch (JSONException e) {
                     dbHandler.updateRAM(bName, BuildName);
-                    RAMCount = 0;
                 }
                 Memory = editBuildBinding.tvMemoryName.getText().toString();
+                String ramSize = editBuildBinding.tvMemorySize.getText().toString().replace("Size: ","");
+                RAMCount = Integer.parseInt(ramSize.replace(" GB", ""));
                 try {
                     jstorage = new JSONObject(sharedPreferences.getString("temp_Storage", ""));
                     dbHandler.updateStorage(bName, BuildName, jstorage.getString("title"), jstorage.getString("model"), jstorage.getString("cacheMemory"), jstorage.getString("storageInterface"), jstorage.getString("type"),
@@ -122,13 +125,20 @@ public class EditBuild extends AppCompatActivity {
                 Case = "PC Case";
                 PSU = "PSupply";
                 CaseFan = "CaseFan";
-                Watts = 500;
-                Price = 600.00;
+                Price = getEstimated_Price(editBuildBinding.tvCpuPrice);
+                Price += getEstimated_Price(editBuildBinding.tvCoolerPrice);
+                Price += getEstimated_Price(editBuildBinding.tvMoboPrice);
+                Price += getEstimated_Price(editBuildBinding.tvMemoryPrice);
+                Price += getEstimated_Price(editBuildBinding.tvStoragePrice);
+                if(Price < 500) Watts = 300;
+                else if (Price < 1000) Watts = 500;
+                else if (Price < 1500) Watts = 750;
+                else Watts = 900;
                 BuildImgUrl = "https://";
 
                 dbHandler.editBuild(bName, BuildName, sCPU, sCooler, sMobo, Memory, Storage, GPU, Case, PSU, CaseFan, RAMCount, Watts, Price, BuildImgUrl);
                 dbHandler.close();
-                Intent builds = new Intent(EditBuild.this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                Intent builds = new Intent(EditBuild.this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(builds);
             }
         });
@@ -226,6 +236,12 @@ public class EditBuild extends AppCompatActivity {
                 
                 hasCPU = true;
             } else {
+                editBuildBinding.tvCpuName.setText("CPU");
+                editBuildBinding.tvCpuBrand.setText("Brand: ");
+                editBuildBinding.tvCpuModel.setText("Model: ");
+                editBuildBinding.tvCpuSpeed.setText("Speed: ");
+                editBuildBinding.tvCpuSocket.setText("Socket: ");
+                editBuildBinding.tvCpuPrice.setText("$");
                 hasCPU = false;
             }
         }
@@ -251,8 +267,7 @@ public class EditBuild extends AppCompatActivity {
                 editBuildBinding.tvCoolerModel.setText("Model: " + cooler.get(0).getModel());
                 editBuildBinding.tvCoolerRpm.setText("RPM: " + cooler.get(0).getrpm());
                 editBuildBinding.tvCoolerNoiseLvl.setText("Noise Level: " + cooler.get(0).getnoiseLvl());
-                editBuildBinding.tvCpuPrice.setText("$" + cooler.get(0).getPrice());
-
+                editBuildBinding.tvCoolerPrice.setText("$" + cooler.get(0).getPrice());
                 hasCooler = true;
             } else {
                 hasCooler = false;
@@ -276,10 +291,10 @@ public class EditBuild extends AppCompatActivity {
             if (!mobo.isEmpty()) {
                 Glide.with(EditBuild.this).load(mobo.get(0).getImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivMoboImg);
                 editBuildBinding.tvMoboName.setText(mobo.get(0).getTitle());
-                editBuildBinding.tvMoboModel.setText("Brand: " + mobo.get(0).getModel());
-                editBuildBinding.tvMoboForm.setText("Model: " + mobo.get(0).getForm());
-                editBuildBinding.tvMoboRamslot.setText("RPM: " + mobo.get(0).getRamslot());
-                editBuildBinding.tvMoboSocket.setText("Noise Level: " + mobo.get(0).getSocket());
+                editBuildBinding.tvMoboModel.setText("Model: " + mobo.get(0).getModel());
+                editBuildBinding.tvMoboForm.setText("Form: " + mobo.get(0).getForm());
+                editBuildBinding.tvMoboRamslot.setText("Memory Slots: " + mobo.get(0).getRamslot());
+                editBuildBinding.tvMoboSocket.setText("Socket: " + mobo.get(0).getSocket());
                 editBuildBinding.tvMoboPrice.setText("$" + mobo.get(0).getPrice());
                 
                 hasMobo = true;
@@ -305,10 +320,10 @@ public class EditBuild extends AppCompatActivity {
             if (!ram.isEmpty()) {
                 Glide.with(EditBuild.this).load(ram.get(0).getImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivMemoryImg);
                 editBuildBinding.tvMemoryName.setText(ram.get(0).getTitle());
-                editBuildBinding.tvMemoryModel.setText("Brand: " + ram.get(0).getModel());
-                editBuildBinding.tvMemorySize.setText("Model: " + ram.get(0).getSize());
-                editBuildBinding.tvMemoryQty.setText("RPM: " + ram.get(0).getQuantity());
-                editBuildBinding.tvMemoryType.setText("Noise Level: " + ram.get(0).getType());
+                editBuildBinding.tvMemoryModel.setText("Model: " + ram.get(0).getModel());
+                editBuildBinding.tvMemorySize.setText("Size: " + ram.get(0).getSize());
+                editBuildBinding.tvMemoryQty.setText("Quantity: " + ram.get(0).getQuantity());
+                editBuildBinding.tvMemoryType.setText("Type: " + ram.get(0).getType());
                 editBuildBinding.tvMemoryPrice.setText("$" + ram.get(0).getPrice());
                 
                 hasRAM = true;
@@ -347,6 +362,17 @@ public class EditBuild extends AppCompatActivity {
         }
     }
 
+    private double getEstimated_Price(TextView textView){
+        double price = 0.00;
+        try{
+            price = Double.parseDouble(textView.getText().toString().replace("$", ""));
+        }catch(Exception ex)
+        {
+            ex.printStackTrace();
+        }
+        return price;
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -357,7 +383,17 @@ public class EditBuild extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        startActivity(new Intent(EditBuild.this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setIcon(android.R.drawable.ic_dialog_alert);
+        builder.setTitle("Quit editing?");
+        builder.setMessage("You will lose your unsaved modification on this build");
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                startActivity(new Intent(EditBuild.this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
     }
 }

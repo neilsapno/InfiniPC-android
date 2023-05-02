@@ -1,5 +1,8 @@
 package cedric.ciel.infinipc.Lists;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public class BuildData {
     private String build_name, cpu_name, cpu_cooler, motherboard, memory, storage, video_card, pc_case, power_supply, case_fan, build_img;
     private int ram_count, watts, productId;
@@ -130,7 +133,8 @@ public class BuildData {
     }
 
     public double getEst_price() {
-        return est_price;
+        BigDecimal bd = new BigDecimal(est_price).setScale(2, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 
     public void setEst_price(double est_price) {

@@ -39,7 +39,7 @@ public class BuildListAdapter extends RecyclerView.Adapter<BuildListAdapter.View
         holder.tv_bName.setText(buildData.getBuild_name());
         holder.tv_CPU.setText("CPU: "+buildData.getCpu_name());
         holder.tv_Memory.setText("Memory: "+buildData.getRam_count() +"GB");
-        holder.tv_Watts.setText("Watts: "+buildData.getWatts());
+        holder.tv_Watts.setText("Est Watts: "+buildData.getWatts());
         holder.tv_Price.setText("Est Price: $"+buildData.getEst_price());
     }
 

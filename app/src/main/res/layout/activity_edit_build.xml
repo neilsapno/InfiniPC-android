@@ -174,7 +174,7 @@
 
                                 <TextView
                                     android:id="@+id/tv_cpu_price"
-                                    android:layout_width="40dp"
+                                    android:layout_width="50dp"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
                                     android:text="Price: 0.00"
@@ -277,7 +277,7 @@
 
                                 <TextView
                                     android:id="@+id/tv_cooler_price"
-                                    android:layout_width="40dp"
+                                    android:layout_width="50dp"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
                                     android:text="Price: 0.00"
@@ -381,7 +381,7 @@
 
                                 <TextView
                                     android:id="@+id/tv_mobo_price"
-                                    android:layout_width="40dp"
+                                    android:layout_width="50dp"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
                                     android:text="Price: 0.00"
@@ -484,7 +484,7 @@
 
                                 <TextView
                                     android:id="@+id/tv_memory_price"
-                                    android:layout_width="40dp"
+                                    android:layout_width="50dp"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
                                     android:text="Price: 0.00"
@@ -587,7 +587,7 @@
 
                                 <TextView
                                     android:id="@+id/tv_storage_price"
-                                    android:layout_width="40dp"
+                                    android:layout_width="50dp"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
                                     android:text="Price: 0.00"
@@ -689,7 +689,7 @@
 
                                 <TextView
                                     android:id="@+id/tv_gpu_price"
-                                    android:layout_width="40dp"
+                                    android:layout_width="50dp"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
                                     android:text="Price: 0.00"
@@ -792,7 +792,7 @@
 
                                 <TextView
                                     android:id="@+id/tv_case_price"
-                                    android:layout_width="40dp"
+                                    android:layout_width="50dp"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
                                     android:text="Price: 0.00"
@@ -895,7 +895,7 @@
 
                                 <TextView
                                     android:id="@+id/tv_psu_price"
-                                    android:layout_width="40dp"
+                                    android:layout_width="50dp"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
                                     android:text="Price: 0.00"
@@ -998,7 +998,7 @@
 
                                 <TextView
                                     android:id="@+id/tv_casefan_price"
-                                    android:layout_width="40dp"
+                                    android:layout_width="50dp"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
                                     android:text="Price: 0.00"

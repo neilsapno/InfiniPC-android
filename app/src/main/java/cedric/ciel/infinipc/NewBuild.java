@@ -120,8 +120,15 @@ public class NewBuild extends AppCompatActivity {
                     Case = "PC Case";
                     PSU = "PSupply";
                     CaseFan = "CaseFan";
-                    Watts = 500;
-                    Price = 600.00;
+                    Price = getEstimated_Price(jCpu);
+                    Price += getEstimated_Price(cooler);
+                    Price += getEstimated_Price(mobo);
+                    Price += getEstimated_Price(ram);
+                    Price += getEstimated_Price(storage);
+                    if(Price < 500) Watts = 300;
+                    else if (Price < 1000) Watts = 500;
+                    else if (Price < 1500) Watts = 750;
+                    else Watts = 900;
                     BuildImgUrl = "https://";
 
                     dbHandler.addNewBuild(BuildName, sCPU, Cooler, Mobo, Memory, Storage, GPU, Case, PSU, CaseFan, RAMCount, Watts, Price, BuildImgUrl);
@@ -289,6 +296,17 @@ public class NewBuild extends AppCompatActivity {
             }
         } catch (Exception e) {
         }
+    }
+
+    private double getEstimated_Price(JSONObject json){
+        double price = 0.00;
+        try{
+            price = json.getDouble("price");
+        }catch(Exception ex)
+        {
+            ex.printStackTrace();
+        }
+        return price;
     }
 
     @Override
