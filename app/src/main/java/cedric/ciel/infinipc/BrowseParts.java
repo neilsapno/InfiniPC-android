@@ -138,6 +138,22 @@ public class BrowseParts extends AppCompatActivity implements StoreAdapter.OnPar
                 Snackbar.make(store_coordinator, "Something went wrong while getting parts list", Snackbar.LENGTH_LONG).show();
             }
         }
+        else if (typePart.equals("GPUs")) {
+            //StoreParts(String img_url, String tv_partsTitle, String tv_partsInfo1, String tv_partsInfo2, String tv_partsInfo3, String tv_partsInfo4, String partsID, String link, double tv_partsPrice)
+            try {
+                JSONArray jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "gpus", ""));
+//                Toast.makeText(this, "" + jsonArray.length(), Toast.LENGTH_SHORT).show();
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject json = jsonArray.getJSONObject(i);
+                    storeParts.add(new StoreParts(json.getString("img"), json.getString("title"), json.getString("brand"), json.getString("model"), json.getString("storageInterface"), json.getString("memory"), json.getString("id"), json.getString("link"), json.getDouble("price")));
+                    //Log.d("JSON get", "json: " + json);
+                    Snackbar.make(store_coordinator, "RAMs Loaded", Snackbar.LENGTH_SHORT).show();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Snackbar.make(store_coordinator, "Something went wrong while getting parts list", Snackbar.LENGTH_LONG).show();
+            }
+        }
 
         adapter = new StoreAdapter(this, storeParts, this);
         mAdapter = new StoreAdapter(this, storeParts, this);

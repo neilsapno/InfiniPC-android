@@ -1021,7 +1021,7 @@
             android:contentDescription="Save build button"
             android:src="@android:drawable/ic_menu_save"
             app:fabSize="normal"
-            app:srcCompat="@android:drawable/ic_menu_save" />
+            app:srcCompat="@drawable/baseline_save_24" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </LinearLayout>

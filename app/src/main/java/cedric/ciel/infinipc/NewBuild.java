@@ -36,7 +36,7 @@ public class NewBuild extends AppCompatActivity {
     private String BuildName, sCPU, Cooler, Mobo, Memory, Storage, GPU, Case, PSU, CaseFan, BuildImgUrl;
     private int RAMCount, Watts;
     private double Price;
-    JSONObject jCpu, cooler, mobo, ram, storage;
+    JSONObject jCpu, cooler, mobo, ram, storage, gpu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,7 +116,16 @@ public class NewBuild extends AppCompatActivity {
                         dbHandler.addStorage(BuildName);
                         Storage = "";
                     }
-                    GPU = "VCard";
+                    try {
+                        gpu = new JSONObject(sharedPreferences.getString("temp_GPU", ""));
+                        dbHandler.addGPU(BuildName, gpu.getString("title"), gpu.getString("brand"), gpu.getString("model"), gpu.getString("storageInterface"), gpu.getString("memory"),
+                                gpu.getString("link"), gpu.getString("img"), gpu.getDouble("price"));
+                        GPU = gpu.getString("title");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        dbHandler.addGPU(BuildName);
+                        GPU = "";
+                    }
                     Case = "PC Case";
                     PSU = "PSupply";
                     CaseFan = "CaseFan";
@@ -125,7 +134,9 @@ public class NewBuild extends AppCompatActivity {
                     Price += getEstimated_Price(mobo);
                     Price += getEstimated_Price(ram);
                     Price += getEstimated_Price(storage);
-                    if(Price < 500) Watts = 300;
+                    Price += getEstimated_Price(gpu);
+                    if (Price <= 0) Watts = 0;
+                    else if(Price < 500) Watts = 300;
                     else if (Price < 1000) Watts = 500;
                     else if (Price < 1500) Watts = 750;
                     else Watts = 900;
@@ -197,6 +208,17 @@ public class NewBuild extends AppCompatActivity {
                 editor.putString("_bname", newBuildBinding.etBuildName.getText().toString());
                 editor.apply();
                 browseStorage.putExtra("type", "Storages");
+                browseStorage.putExtra("from", "new");
+                startActivity(browseStorage);
+            }
+        });
+        newBuildBinding.cvGpu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent browseStorage = new Intent(NewBuild.this, BrowseParts.class);
+                editor.putString("_bname", newBuildBinding.etBuildName.getText().toString());
+                editor.apply();
+                browseStorage.putExtra("type", "GPUs");
                 browseStorage.putExtra("from", "new");
                 startActivity(browseStorage);
             }
@@ -293,6 +315,23 @@ public class NewBuild extends AppCompatActivity {
                 newBuildBinding.tvStorageInterface.setText("Interface: " + storage.getString("storageInterface"));
                 newBuildBinding.tvStorageType.setText("Type: " + storage.getString("type"));
                 newBuildBinding.tvStoragePrice.setText("$" + storage.getDouble("price"));
+            }
+        } catch (Exception e) {
+        }
+        try {
+            gpu = new JSONObject(sharedPreferences.getString("temp_GPU", ""));
+            //Motherboard
+            if (gpu.has("id")) {
+                Glide.with(NewBuild.this)
+                        .load(gpu.getString("img"))
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(newBuildBinding.ivGpuImg);
+                newBuildBinding.tvGpuName.setText(gpu.getString("title"));
+                newBuildBinding.tvGpuBrand.setText("Model: " + gpu.getString("brand"));
+                newBuildBinding.tvGpuModel .setText("Cache Memory Size: " + gpu.getString("model"));
+                newBuildBinding.tvGpuInterface.setText("Interface: " + gpu.getString("storageInterface"));
+                newBuildBinding.tvGpuVram.setText("Type: " + gpu.getString("memory"));
+                newBuildBinding.tvGpuPrice.setText("$" + gpu.getDouble("price"));
             }
         } catch (Exception e) {
         }

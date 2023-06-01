@@ -6,12 +6,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 
 import cedric.ciel.infinipc.Parts.CPU;
 import cedric.ciel.infinipc.Parts.Cooler;
+import cedric.ciel.infinipc.Parts.GPU;
 import cedric.ciel.infinipc.Parts.Motherboard;
 import cedric.ciel.infinipc.Parts.RAM;
 import cedric.ciel.infinipc.Parts.Storage;
@@ -36,25 +38,27 @@ public class EditBuild extends AppCompatActivity {
     SharedPreferences.Editor editor;
     DBHandler dbHandler;
     ActivityEditBuildBinding editBuildBinding;
-    private ImageView iv_cpuImg;
-    private EditText et_buildName;
     private String BuildName, sCPU, sCooler, sMobo, Memory, Storage, GPU, Case, PSU, CaseFan, BuildImgUrl;
     private int RAMCount, Watts;
     private double Price;
-    Boolean hasCPU, hasCooler, hasMobo, hasRAM, hasStorage = false;
+    Boolean hasCPU, hasCooler, hasMobo, hasRAM, hasStorage, hasGPU = false;
     ArrayList<CPU> cpu = new ArrayList<>();
     ArrayList<Cooler> cooler = new ArrayList<>();
     ArrayList<Motherboard> mobo = new ArrayList<>();
     ArrayList<RAM> ram = new ArrayList<>();
     ArrayList<Storage> storage = new ArrayList<>();
+    ArrayList<GPU> gpu = new ArrayList<>();
 
-    JSONObject jCpu, jcooler, jmobo, jram, jstorage;
+    JSONObject jCpu, jcooler, jmobo, jram, jstorage, jGpu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         editBuildBinding = ActivityEditBuildBinding.inflate(getLayoutInflater());
         setContentView(editBuildBinding.getRoot());
+
+        Toolbar tb = findViewById(R.id.toolbar);
+        setSupportActionBar(tb);
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
@@ -121,7 +125,14 @@ public class EditBuild extends AppCompatActivity {
                     dbHandler.updateStorage(bName, BuildName);
                 }
                 Storage = editBuildBinding.tvStorageName.getText().toString();
-                GPU = "VCard";
+                try {
+                    jGpu = new JSONObject(sharedPreferences.getString("temp_GPU", ""));
+                    dbHandler.updateGPU(bName, BuildName, jGpu.getString("title"), jGpu.getString("brand"), jGpu.getString("model"), jGpu.getString("storageInterface"), jGpu.getString("memory"),
+                            jGpu.getString("link"), jGpu.getString("img"), jGpu.getDouble("price"));
+                } catch (JSONException e) {
+                    dbHandler.updateGPU(bName, BuildName);
+                }
+                GPU = editBuildBinding.tvGpuName.getText().toString();
                 Case = "PC Case";
                 PSU = "PSupply";
                 CaseFan = "CaseFan";
@@ -130,7 +141,9 @@ public class EditBuild extends AppCompatActivity {
                 Price += getEstimated_Price(editBuildBinding.tvMoboPrice);
                 Price += getEstimated_Price(editBuildBinding.tvMemoryPrice);
                 Price += getEstimated_Price(editBuildBinding.tvStoragePrice);
-                if(Price < 500) Watts = 300;
+                Price += getEstimated_Price(editBuildBinding.tvGpuPrice);
+                if (Price <= 0) Watts = 0;
+                else if(Price < 500) Watts = 300;
                 else if (Price < 1000) Watts = 500;
                 else if (Price < 1500) Watts = 750;
                 else Watts = 900;
@@ -202,6 +215,17 @@ public class EditBuild extends AppCompatActivity {
                 startActivity(browseMemory);
             }
         });
+        editBuildBinding.cvGpu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent browseGpus = new Intent(EditBuild.this, BrowseParts.class);
+                editor.putString("_bname", editBuildBinding.etBuildName.getText().toString());
+                editor.apply();
+                browseGpus.putExtra("type", "GPUs");
+                browseGpus.putExtra("from", "edit");
+                startActivity(browseGpus);
+            }
+        });
     }
 
     private void getParts() {
@@ -210,6 +234,7 @@ public class EditBuild extends AppCompatActivity {
         mobo = dbHandler.getMobo(mobo, editBuildBinding.etBuildName.getText().toString());
         ram = dbHandler.getRAM(ram, editBuildBinding.etBuildName.getText().toString());
         storage = dbHandler.getStorage(storage, editBuildBinding.etBuildName.getText().toString());
+        gpu = dbHandler.getGPU(gpu, editBuildBinding.etBuildName.getText().toString());
 
         try {
             //CPU
@@ -332,7 +357,7 @@ public class EditBuild extends AppCompatActivity {
             }
         }
         try {
-            //Mobo
+            //Storage
             jstorage = new JSONObject(sharedPreferences.getString("temp_Storage", ""));
             Glide.with(EditBuild.this)
                     .load(jstorage.getString("img"))
@@ -360,6 +385,39 @@ public class EditBuild extends AppCompatActivity {
                 hasStorage = false;
             }
         }
+        try {
+            //GPU
+            jGpu = new JSONObject(sharedPreferences.getString("temp_GPU", ""));
+            Glide.with(EditBuild.this).load(jGpu.getString("img")).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivCpuImg);
+            editBuildBinding.tvCpuName.setText(jGpu.getString("title"));
+            editBuildBinding.tvCpuBrand.setText("Brand: " + jGpu.getString("brand"));
+            editBuildBinding.tvCpuModel.setText("Model: " + jGpu.getString("model"));
+            editBuildBinding.tvCpuSpeed.setText("Speed: " + jGpu.getString("storageInterface"));
+            editBuildBinding.tvCpuSocket.setText("Socket: " + jGpu.getString("memory"));
+            editBuildBinding.tvCpuPrice.setText("$" + jGpu.getDouble("price"));
+            hasCPU = true;
+        } catch (JSONException e) {
+            //return;
+            if (!gpu.isEmpty()) {
+                Glide.with(EditBuild.this).load(gpu.get(0).getImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivGpuImg);
+                editBuildBinding.tvGpuName.setText(gpu.get(0).getTitle());
+                editBuildBinding.tvGpuName.setText("Brand: " + gpu.get(0).getBrand());
+                editBuildBinding.tvGpuName.setText("Model: " + gpu.get(0).getModel());
+                editBuildBinding.tvGpuName.setText("Speed: " + gpu.get(0).getSpeed());
+                editBuildBinding.tvGpuName.setText("Socket: " + gpu.get(0).getSocket());
+                editBuildBinding.tvGpuName.setText("$" + gpu.get(0).getPrice());
+
+                hasGPU = true;
+            } else {
+                editBuildBinding.tvCpuName.setText("CPU");
+                editBuildBinding.tvCpuBrand.setText("Brand: ");
+                editBuildBinding.tvCpuModel.setText("Model: ");
+                editBuildBinding.tvCpuSpeed.setText("Interface: ");
+                editBuildBinding.tvCpuSocket.setText("VRAM: ");
+                editBuildBinding.tvCpuPrice.setText("$");
+                hasGPU = false;
+            }
+        }
     }
 
     private double getEstimated_Price(TextView textView){
@@ -371,6 +429,28 @@ public class EditBuild extends AppCompatActivity {
             ex.printStackTrace();
         }
         return price;
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.del_build_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        String bName = sharedPreferences.getString("origBuild", null);
+        switch (id){
+            case R.id.delete_build:
+                dbHandler.deleteBuild(bName);
+                Intent builds = new Intent(EditBuild.this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(builds);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+
     }
 
     @Override

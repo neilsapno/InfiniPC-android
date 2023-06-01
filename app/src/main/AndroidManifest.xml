@@ -16,6 +16,12 @@
         android:theme="@style/Theme.InfiniPC"
         tools:targetApi="31">
         <activity
+            android:name=".AboutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".BenchmarkActivity"
+            android:exported="false" />
+        <activity
             android:name=".EditBuild"
             android:exported="false" />
         <activity

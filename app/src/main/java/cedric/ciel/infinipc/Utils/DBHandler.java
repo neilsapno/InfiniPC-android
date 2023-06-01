@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import cedric.ciel.infinipc.Lists.BuildData;
 import cedric.ciel.infinipc.Parts.CPU;
 import cedric.ciel.infinipc.Parts.Cooler;
+import cedric.ciel.infinipc.Parts.GPU;
 import cedric.ciel.infinipc.Parts.Motherboard;
 import cedric.ciel.infinipc.Parts.RAM;
 import cedric.ciel.infinipc.Parts.Storage;
@@ -127,13 +128,24 @@ public class DBHandler extends SQLiteOpenHelper {
                 + "link TEXT,"
                 + "img TEXT,"
                 + PRICE_COL + " REAL)";
-
+        String query7 = "CREATE TABLE IF NOT EXISTS " + TBL_GPU + " ("
+                + BUILD_NAME_COL + " TEXT PRIMARY KEY,"
+                + "title TEXT,"
+                + "brand TEXT,"
+                + "model TEXT,"
+                + "interface TEXT,"
+                + "vram TEXT,"
+                + "link TEXT,"
+                + "img TEXT,"
+                + PRICE_COL + " REAL)";
         db.execSQL(query);
         db.execSQL(query2);
         db.execSQL(query3);
         db.execSQL(query4);
         db.execSQL(query5);
         db.execSQL(query6);
+        db.execSQL(query7);
+
     }
 
     public void addNewBuild(String buildName, String CPU, String Cooler, String Mobo, String RAM, String Storage,
@@ -194,6 +206,12 @@ public class DBHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         db.delete(TABLE_NAME, "build_name=?", new String[]{buildName});
+        db.delete(TBL_CPU, "build_name=?", new String[]{buildName});
+        db.delete(TBL_COOLER, "build_name=?", new String[]{buildName});
+        db.delete(TBL_MOBO, "build_name=?", new String[]{buildName});
+        db.delete(TBL_RAM, "build_name=?", new String[]{buildName});
+        db.delete(TBL_STORAGE, "build_name=?", new String[]{buildName});
+        db.delete(TBL_GPU, "build_name=?", new String[]{buildName});
         db.close();
     }
 
@@ -839,10 +857,138 @@ public class DBHandler extends SQLiteOpenHelper {
         return storage;
     }
 
+    //add blank cpu
+    public void addGPU(String buildname){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        // on below line we are passing all values
+        // along with its key and value pair.
+        values.put(BUILD_NAME_COL, buildname);
+
+        // after adding all values we are passing
+        // content values to our table.
+        db.insert(TBL_GPU, null, values);
+
+        // at last we are closing our
+        // database after adding database.
+        db.close();
+    }
+
+    public void addGPU(String buildname, String title, String brand, String model, String Interface, String vram, String link, String img, double price){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        GPU gpu = new GPU(buildname, title, brand, model, Interface, vram, link, img, price);
+
+        ContentValues values = new ContentValues();
+
+        // on below line we are passing all values
+        // along with its key and value pair.
+        values.put(BUILD_NAME_COL, gpu.getBuildName());
+        values.put("title", gpu.getTitle());
+        values.put("brand", gpu.getBrand());
+        values.put("model", gpu.getModel());
+        values.put("interface", gpu.getSpeed());
+        values.put("vram", gpu.getSocket());
+        values.put("link", gpu.getLink());
+        values.put("img", gpu.getImg());
+        values.put(PRICE_COL, gpu.getPrice());
+
+        // after adding all values we are passing
+        // content values to our table.
+        db.insert(TBL_GPU, null, values);
+
+        // at last we are closing our
+        // database after adding database.
+        db.close();
+    }
+
+    public ArrayList<GPU> getGPU(ArrayList<GPU> gpu, String buildname)
+    {
+        // on below line we are creating a
+        // database for reading our database.
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // on below line we are creating a cursor with query to
+        // read data from database.
+        Cursor cursorGPU
+                = db.rawQuery("SELECT * FROM " + TBL_GPU + " WHERE build_name='" + buildname + "'" , null);
+
+        // on below line we are creating a new array list.
+//        ArrayList<BuildData> buildDataArrayList
+//                = new ArrayList<>();
+
+        // moving our cursor to first position.
+        if (cursorGPU.moveToFirst()) {
+            do {
+                // on below line we are adding the data from
+                // cursor to our array list.
+                //CPU(String buildName, String title, String brand, String model, String speed, String socket, String link, String img, double price)
+                gpu.add(new GPU(
+                        cursorGPU.getString(0),
+                        cursorGPU.getString(1),
+                        cursorGPU.getString(2),
+                        cursorGPU.getString(3),
+                        cursorGPU.getString(4),
+                        cursorGPU.getString(5),
+                        cursorGPU.getString(6),
+                        cursorGPU.getString(7),
+                        cursorGPU.getDouble(8)));
+            } while (cursorGPU.moveToNext());
+            // moving our cursor to next.
+        }
+        // at last closing our cursor
+        // and returning our array list.
+        cursorGPU.close();
+        return gpu;
+    }
+
+    public void updateGPU(String originalBuildName, String buildname, String title, String brand, String model, String Interface, String vram, String link, String img, double price){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        GPU gpu = new GPU(buildname, title, brand, model, Interface, vram, link, img, price);
+
+        ContentValues values = new ContentValues();
+
+        values.put(BUILD_NAME_COL, gpu.getBuildName());
+        values.put("title", gpu.getTitle());
+        values.put("brand", gpu.getBrand());
+        values.put("model", gpu.getModel());
+        values.put("speed", gpu.getSpeed());
+        values.put("socket", gpu.getSocket());
+        values.put("link", gpu.getLink());
+        values.put("img", gpu.getImg());
+        values.put(PRICE_COL, gpu.getPrice());
+
+        db.update(TBL_GPU, values, "build_name=?", new String[]{originalBuildName});
+
+        db.close();
+    }
+
+    public void updateGPU(String originalBuildName, String buildname){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(BUILD_NAME_COL, buildname);
+
+        db.update(TBL_GPU, values, "build_name=?", new String[]{originalBuildName});
+
+        db.close();
+    }
+
+
+
+
+
+
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // this method is called to check if the table exists already.
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-        onCreate(db);
+        if(oldVersion < newVersion) {
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+            onCreate(db);
+        }
     }
 }
