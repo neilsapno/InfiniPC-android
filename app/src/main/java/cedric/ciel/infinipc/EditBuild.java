@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.view.Menu;
@@ -17,6 +18,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,9 +26,12 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import cedric.ciel.infinipc.Parts.CPU;
+import cedric.ciel.infinipc.Parts.Case;
+import cedric.ciel.infinipc.Parts.CaseFan;
 import cedric.ciel.infinipc.Parts.Cooler;
 import cedric.ciel.infinipc.Parts.GPU;
 import cedric.ciel.infinipc.Parts.Motherboard;
+import cedric.ciel.infinipc.Parts.PSU;
 import cedric.ciel.infinipc.Parts.RAM;
 import cedric.ciel.infinipc.Parts.Storage;
 import cedric.ciel.infinipc.Utils.DBHandler;
@@ -41,15 +46,19 @@ public class EditBuild extends AppCompatActivity {
     private String BuildName, sCPU, sCooler, sMobo, Memory, Storage, GPU, Case, PSU, CaseFan, BuildImgUrl;
     private int RAMCount, Watts;
     private double Price;
-    Boolean hasCPU, hasCooler, hasMobo, hasRAM, hasStorage, hasGPU = false;
+    Boolean hasCPU, hasCooler, hasMobo, hasRAM, hasStorage, hasGPU, hasPSU, hasCase, hasCaseFan = false;
     ArrayList<CPU> cpu = new ArrayList<>();
     ArrayList<Cooler> cooler = new ArrayList<>();
     ArrayList<Motherboard> mobo = new ArrayList<>();
     ArrayList<RAM> ram = new ArrayList<>();
     ArrayList<Storage> storage = new ArrayList<>();
     ArrayList<GPU> gpu = new ArrayList<>();
+    ArrayList<PSU> psu = new ArrayList<>();
+    ArrayList<Case> ccase = new ArrayList<>();
+    ArrayList<CaseFan> casefan = new ArrayList<>();
 
-    JSONObject jCpu, jcooler, jmobo, jram, jstorage, jGpu;
+    JSONObject jCpu, jcooler, jmobo, jram, jstorage, jGpu, jPsu, jCase, jCaseFan;
+    private String ram_socket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,15 +142,45 @@ public class EditBuild extends AppCompatActivity {
                     dbHandler.updateGPU(bName, BuildName);
                 }
                 GPU = editBuildBinding.tvGpuName.getText().toString();
-                Case = "PC Case";
-                PSU = "PSupply";
-                CaseFan = "CaseFan";
+
+                try {
+                    jPsu = new JSONObject(sharedPreferences.getString("temp_PSU", ""));
+                    dbHandler.updatePSU(bName, BuildName, jPsu.getString("title"), jPsu.getString("brand"), jPsu.getString("model"), jPsu.getString("power"), jPsu.getString("efficiency"),
+                            jPsu.getString("link"), jPsu.getString("img"), jPsu.getDouble("price"));
+                } catch (JSONException e) {
+                    dbHandler.updatePSU(bName, BuildName);
+                }
+                PSU = editBuildBinding.tvPsuName.getText().toString();
+
+                try {
+                    jCase = new JSONObject(sharedPreferences.getString("temp_Case", ""));
+                    dbHandler.updateCase(bName, BuildName, jCase.getString("title"), jCase.getString("brand"), jCase.getString("model"), jCase.getString("sidePanel"), jCase.getString("cabinetType"),
+                            jCase.getString("link"), jCase.getString("img"), jCase.getDouble("price"));
+                } catch (JSONException e) {
+                    dbHandler.updateCase(bName, BuildName);
+                }
+                Case = editBuildBinding.tvCaseName.getText().toString();
+
+                try {
+                    jCaseFan = new JSONObject(sharedPreferences.getString("temp_CaseFan", ""));
+                    dbHandler.updateCaseFan(bName, BuildName, jCaseFan.getString("title"), jCaseFan.getString("model"), jCaseFan.getString("rpm"), jCaseFan.getString("noiseLevel"), jCaseFan.getString("airFlow"),
+                            jCaseFan.getString("link"), jCaseFan.getString("img"), jCaseFan.getDouble("price"));
+                } catch (JSONException e) {
+                    dbHandler.updateCaseFan(bName, BuildName);
+                }
+                CaseFan = editBuildBinding.tvCasefanName.getText().toString();
+
+
                 Price = getEstimated_Price(editBuildBinding.tvCpuPrice);
                 Price += getEstimated_Price(editBuildBinding.tvCoolerPrice);
                 Price += getEstimated_Price(editBuildBinding.tvMoboPrice);
                 Price += getEstimated_Price(editBuildBinding.tvMemoryPrice);
                 Price += getEstimated_Price(editBuildBinding.tvStoragePrice);
                 Price += getEstimated_Price(editBuildBinding.tvGpuPrice);
+                Price += getEstimated_Price(editBuildBinding.tvPsuPrice);
+                Price += getEstimated_Price(editBuildBinding.tvCasePrice);
+                Price += getEstimated_Price(editBuildBinding.tvCasefanPrice);
+
                 if (Price <= 0) Watts = 0;
                 else if(Price < 500) Watts = 300;
                 else if (Price < 1000) Watts = 500;
@@ -157,6 +196,29 @@ public class EditBuild extends AppCompatActivity {
         });
         getParts();
         partsSelector();
+        try{
+            if (!isRAMCompatible() || !isSocketCompatible()) {
+                Snackbar.make(editBuildBinding.coordinatorLay, "One of the components have compatibility issue/s", Snackbar.LENGTH_INDEFINITE).setBackgroundTint(Color.rgb(255, 153, 0))
+                        .setAction("See Info", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(EditBuild.this);
+                                builder.setTitle("Compatibility Issue/s found:");
+                                String message = "";
+                                if (!isSocketCompatible())
+                                    message += "The selected Motherboard and CPU socket type are not compatible.\n";
+                                if (!isRAMCompatible())
+                                    message += "The selected RAM is not compatible with Motherboard.";
+                                builder.setMessage(message);
+                                builder.setPositiveButton("Close", null);
+                                builder.show();
+                            }
+                        })
+                        .show();
+            }
+        } catch (Exception e) {
+
+        }
     }
 
     private void partsSelector() {
@@ -226,6 +288,39 @@ public class EditBuild extends AppCompatActivity {
                 startActivity(browseGpus);
             }
         });
+        editBuildBinding.cvPsu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent browseGpus = new Intent(EditBuild.this, BrowseParts.class);
+                editor.putString("_bname", editBuildBinding.etBuildName.getText().toString());
+                editor.apply();
+                browseGpus.putExtra("type", "PSUs");
+                browseGpus.putExtra("from", "edit");
+                startActivity(browseGpus);
+            }
+        });
+        editBuildBinding.cvCase.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent browseGpus = new Intent(EditBuild.this, BrowseParts.class);
+                editor.putString("_bname", editBuildBinding.etBuildName.getText().toString());
+                editor.apply();
+                browseGpus.putExtra("type", "Cases");
+                browseGpus.putExtra("from", "edit");
+                startActivity(browseGpus);
+            }
+        });
+        editBuildBinding.cvCasefan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent browseGpus = new Intent(EditBuild.this, BrowseParts.class);
+                editor.putString("_bname", editBuildBinding.etBuildName.getText().toString());
+                editor.apply();
+                browseGpus.putExtra("type", "CaseFans");
+                browseGpus.putExtra("from", "edit");
+                startActivity(browseGpus);
+            }
+        });
     }
 
     private void getParts() {
@@ -235,6 +330,9 @@ public class EditBuild extends AppCompatActivity {
         ram = dbHandler.getRAM(ram, editBuildBinding.etBuildName.getText().toString());
         storage = dbHandler.getStorage(storage, editBuildBinding.etBuildName.getText().toString());
         gpu = dbHandler.getGPU(gpu, editBuildBinding.etBuildName.getText().toString());
+        psu = dbHandler.getPSU(psu, editBuildBinding.etBuildName.getText().toString());
+        ccase = dbHandler.getCase(ccase, editBuildBinding.etBuildName.getText().toString());
+        casefan = dbHandler.getCaseFan(casefan, editBuildBinding.etBuildName.getText().toString());
 
         try {
             //CPU
@@ -246,11 +344,11 @@ public class EditBuild extends AppCompatActivity {
             editBuildBinding.tvCpuSpeed.setText("Speed: " + jCpu.getString("speed"));
             editBuildBinding.tvCpuSocket.setText("Socket: " + jCpu.getString("socketType"));
             editBuildBinding.tvCpuPrice.setText("$" + jCpu.getDouble("price"));
-            
+
             hasCPU = true;
         } catch (JSONException e) {
             //return;
-            if (!cpu.isEmpty()) {
+            if (cpu.get(0).getTitle() != null) {
                 Glide.with(EditBuild.this).load(cpu.get(0).getImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivCpuImg);
                 editBuildBinding.tvCpuName.setText(cpu.get(0).getTitle());
                 editBuildBinding.tvCpuBrand.setText("Brand: " + cpu.get(0).getBrand());
@@ -258,7 +356,6 @@ public class EditBuild extends AppCompatActivity {
                 editBuildBinding.tvCpuSpeed.setText("Speed: " + cpu.get(0).getSpeed());
                 editBuildBinding.tvCpuSocket.setText("Socket: " + cpu.get(0).getSocket());
                 editBuildBinding.tvCpuPrice.setText("$" + cpu.get(0).getPrice());
-                
                 hasCPU = true;
             } else {
                 editBuildBinding.tvCpuName.setText("CPU");
@@ -285,7 +382,7 @@ public class EditBuild extends AppCompatActivity {
             editBuildBinding.tvCoolerPrice.setText("$" + jcooler.getDouble("price"));
             hasCooler = true;
         } catch (JSONException e) {
-            if (!cooler.isEmpty()) {
+            if (cooler.get(0).getTitle() != null) {
                 Glide.with(EditBuild.this).load(cooler.get(0).getImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivCoolerImg);
                 editBuildBinding.tvCoolerName.setText(cooler.get(0).getTitle());
                 editBuildBinding.tvCoolerBrand.setText("Brand: " + cooler.get(0).getBrand());
@@ -295,6 +392,12 @@ public class EditBuild extends AppCompatActivity {
                 editBuildBinding.tvCoolerPrice.setText("$" + cooler.get(0).getPrice());
                 hasCooler = true;
             } else {
+                editBuildBinding.tvCoolerName.setText("CPU Cooler");
+                editBuildBinding.tvCoolerBrand.setText("Brand: ");
+                editBuildBinding.tvCoolerModel.setText("Model: ");
+                editBuildBinding.tvCoolerRpm.setText("RPM: ");
+                editBuildBinding.tvCoolerNoiseLvl.setText("Noise Level: ");
+                editBuildBinding.tvCoolerPrice.setText("$");
                 hasCooler = false;
             }
         }
@@ -313,7 +416,7 @@ public class EditBuild extends AppCompatActivity {
             editBuildBinding.tvMoboPrice.setText("$" + jmobo.getDouble("price"));
             hasMobo = true;
         } catch (JSONException e) {
-            if (!mobo.isEmpty()) {
+            if (mobo.get(0).getTitle() != null) {
                 Glide.with(EditBuild.this).load(mobo.get(0).getImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivMoboImg);
                 editBuildBinding.tvMoboName.setText(mobo.get(0).getTitle());
                 editBuildBinding.tvMoboModel.setText("Model: " + mobo.get(0).getModel());
@@ -321,9 +424,15 @@ public class EditBuild extends AppCompatActivity {
                 editBuildBinding.tvMoboRamslot.setText("Memory Slots: " + mobo.get(0).getRamslot());
                 editBuildBinding.tvMoboSocket.setText("Socket: " + mobo.get(0).getSocket());
                 editBuildBinding.tvMoboPrice.setText("$" + mobo.get(0).getPrice());
-                
+
                 hasMobo = true;
             } else {
+                editBuildBinding.tvMoboName.setText("Motherboard");
+                editBuildBinding.tvMoboModel.setText("Model: ");
+                editBuildBinding.tvMoboForm.setText("Form: ");
+                editBuildBinding.tvMoboRamslot.setText("Memory Slots: ");
+                editBuildBinding.tvMoboSocket.setText("Socket: ");
+                editBuildBinding.tvMoboPrice.setText("$");
                 hasMobo = false;
             }
         }
@@ -342,7 +451,7 @@ public class EditBuild extends AppCompatActivity {
             editBuildBinding.tvMemoryPrice.setText("$" + jram.getDouble("price"));
             hasRAM = true;
         } catch (JSONException e) {
-            if (!ram.isEmpty()) {
+            if (ram.get(0).getTitle() != null) {
                 Glide.with(EditBuild.this).load(ram.get(0).getImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivMemoryImg);
                 editBuildBinding.tvMemoryName.setText(ram.get(0).getTitle());
                 editBuildBinding.tvMemoryModel.setText("Model: " + ram.get(0).getModel());
@@ -350,9 +459,15 @@ public class EditBuild extends AppCompatActivity {
                 editBuildBinding.tvMemoryQty.setText("Quantity: " + ram.get(0).getQuantity());
                 editBuildBinding.tvMemoryType.setText("Type: " + ram.get(0).getType());
                 editBuildBinding.tvMemoryPrice.setText("$" + ram.get(0).getPrice());
-                
+
                 hasRAM = true;
             } else {
+                editBuildBinding.tvMemoryName.setText("RAM / Memory");
+                editBuildBinding.tvMemoryModel.setText("Model: ");
+                editBuildBinding.tvMemorySize.setText("Size: ");
+                editBuildBinding.tvMemoryQty.setText("Quantity: ");
+                editBuildBinding.tvMemoryType.setText("Type: ");
+                editBuildBinding.tvMemoryPrice.setText("$");
                 hasRAM = false;
             }
         }
@@ -371,7 +486,7 @@ public class EditBuild extends AppCompatActivity {
             editBuildBinding.tvStoragePrice.setText("$" + jstorage.getDouble("price"));
             hasStorage = true;
         } catch (JSONException e) {
-            if (!storage.isEmpty()) {
+            if (storage.get(0).getTitle() != null) {
                 Glide.with(EditBuild.this).load(storage.get(0).getImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivStorageImg);
                 editBuildBinding.tvStorageName.setText(storage.get(0).getTitle());
                 editBuildBinding.tvStorageModel.setText("Model: " + storage.get(0).getModel());
@@ -379,45 +494,165 @@ public class EditBuild extends AppCompatActivity {
                 editBuildBinding.tvStorageInterface.setText("Interface: " + storage.get(0).getInterface());
                 editBuildBinding.tvStorageType.setText("Type: " + storage.get(0).getType());
                 editBuildBinding.tvStoragePrice.setText("$" + storage.get(0).getPrice());
-                
+
                 hasStorage = true;
             } else {
+                editBuildBinding.tvStorageName.setText("Storage");
+                editBuildBinding.tvStorageModel.setText("Model: ");
+                editBuildBinding.tvStorageCachesize.setText("Cache Memory Size: ");
+                editBuildBinding.tvStorageInterface.setText("Interface: ");
+                editBuildBinding.tvStorageType.setText("Type: ");
+                editBuildBinding.tvStoragePrice.setText("$");
                 hasStorage = false;
             }
         }
         try {
             //GPU
             jGpu = new JSONObject(sharedPreferences.getString("temp_GPU", ""));
-            Glide.with(EditBuild.this).load(jGpu.getString("img")).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivCpuImg);
-            editBuildBinding.tvCpuName.setText(jGpu.getString("title"));
-            editBuildBinding.tvCpuBrand.setText("Brand: " + jGpu.getString("brand"));
-            editBuildBinding.tvCpuModel.setText("Model: " + jGpu.getString("model"));
-            editBuildBinding.tvCpuSpeed.setText("Speed: " + jGpu.getString("storageInterface"));
-            editBuildBinding.tvCpuSocket.setText("Socket: " + jGpu.getString("memory"));
-            editBuildBinding.tvCpuPrice.setText("$" + jGpu.getDouble("price"));
+            Glide.with(EditBuild.this).load(jGpu.getString("img")).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivGpuImg);
+            editBuildBinding.tvGpuName.setText(jGpu.getString("title"));
+            editBuildBinding.tvGpuModel.setText("Model: " + jGpu.getString("model"));
+            editBuildBinding.tvGpuSpeed.setText("Speed: " + jGpu.getString("clockSpeed"));
+            editBuildBinding.tvGpuInterface.setText("Interface: " + jGpu.getString("storageInterface"));
+            editBuildBinding.tvGpuVram.setText("VRAM: " + jGpu.getString("memory"));
+            editBuildBinding.tvGpuPrice.setText("$" + jGpu.getDouble("price"));
             hasCPU = true;
         } catch (JSONException e) {
             //return;
-            if (!gpu.isEmpty()) {
+            if (gpu.get(0).getTitle() != null) {
                 Glide.with(EditBuild.this).load(gpu.get(0).getImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivGpuImg);
                 editBuildBinding.tvGpuName.setText(gpu.get(0).getTitle());
-                editBuildBinding.tvGpuName.setText("Brand: " + gpu.get(0).getBrand());
-                editBuildBinding.tvGpuName.setText("Model: " + gpu.get(0).getModel());
-                editBuildBinding.tvGpuName.setText("Speed: " + gpu.get(0).getSpeed());
-                editBuildBinding.tvGpuName.setText("Socket: " + gpu.get(0).getSocket());
-                editBuildBinding.tvGpuName.setText("$" + gpu.get(0).getPrice());
+                editBuildBinding.tvGpuModel.setText("Model: " + gpu.get(0).getModel());
+                editBuildBinding.tvGpuSpeed.setText("Speed: " + gpu.get(0).getSpeed());
+                editBuildBinding.tvGpuInterface.setText("Interface: " + gpu.get(0).getInterface());
+                editBuildBinding.tvGpuVram.setText("VRAM: " + gpu.get(0).getVram());
+                editBuildBinding.tvGpuPrice.setText("$" + gpu.get(0).getPrice());
 
                 hasGPU = true;
             } else {
-                editBuildBinding.tvCpuName.setText("CPU");
-                editBuildBinding.tvCpuBrand.setText("Brand: ");
-                editBuildBinding.tvCpuModel.setText("Model: ");
-                editBuildBinding.tvCpuSpeed.setText("Interface: ");
-                editBuildBinding.tvCpuSocket.setText("VRAM: ");
-                editBuildBinding.tvCpuPrice.setText("$");
+                editBuildBinding.tvGpuName.setText("Graphics Card: ");
+                editBuildBinding.tvGpuModel.setText("Model: ");
+                editBuildBinding.tvGpuSpeed.setText("clockSpeed: ");
+                editBuildBinding.tvGpuInterface.setText("Interface: ");
+                editBuildBinding.tvGpuVram.setText("VRAM: ");
+                editBuildBinding.tvGpuPrice.setText("$");
                 hasGPU = false;
             }
         }
+        try {
+            //PSU
+            jPsu = new JSONObject(sharedPreferences.getString("temp_PSU", ""));
+            Glide.with(EditBuild.this).load(jPsu.getString("img")).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivPsuImg);
+            editBuildBinding.tvPsuName.setText(jPsu.getString("title"));
+            editBuildBinding.tvPsuBrand.setText("Brand: " + jPsu.getString("brand"));
+            editBuildBinding.tvPsuModel.setText("Model: " + jPsu.getString("model"));
+            editBuildBinding.tvPsuPower.setText("Power: " + jPsu.getString("power"));
+            editBuildBinding.tvPsuEfficiency.setText("Efficiency: " + jPsu.getString("efficiency"));
+            editBuildBinding.tvPsuPrice.setText("$" + jPsu.getDouble("price"));
+            hasPSU = true;
+        } catch (JSONException e) {
+            //return;
+            if (psu.get(0).getTitle() != null) {
+                Glide.with(EditBuild.this).load(psu.get(0).getImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivPsuImg);
+                editBuildBinding.tvPsuName.setText(psu.get(0).getTitle());
+                editBuildBinding.tvPsuBrand.setText("Brand: " + psu.get(0).getBrand());
+                editBuildBinding.tvPsuModel.setText("Model: " + psu.get(0).getModel());
+                editBuildBinding.tvPsuPower.setText("Power: " + psu.get(0).getPower());
+                editBuildBinding.tvPsuEfficiency.setText("Efficiency: " + psu.get(0).getEfficiency());
+                editBuildBinding.tvPsuPrice.setText("$" + psu.get(0).getPrice());
+
+                hasPSU = true;
+            } else {
+                editBuildBinding.tvPsuName.setText("Power Supply");
+                editBuildBinding.tvPsuBrand.setText("Brand: ");
+                editBuildBinding.tvPsuModel.setText("Model: ");
+                editBuildBinding.tvPsuPower.setText("Power: ");
+                editBuildBinding.tvPsuEfficiency.setText("Efficiency: ");
+                editBuildBinding.tvPsuPrice.setText("$");
+                hasPSU = false;
+            }
+        }
+        try {
+            //Case
+            jCase = new JSONObject(sharedPreferences.getString("temp_Case", ""));
+            Glide.with(EditBuild.this).load(jCase.getString("img")).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivCaseImg);
+            editBuildBinding.tvCaseName.setText(jCase.getString("title"));
+            editBuildBinding.tvCaseBrand.setText("Brand: " + jCase.getString("brand"));
+            editBuildBinding.tvCaseModel.setText("Model: " + jCase.getString("model"));
+            editBuildBinding.tvCaseSidePanel.setText("Side Panel: " + jCase.getString("sidePanel"));
+            editBuildBinding.tvCaseForm.setText("Cabinet Type: " + jCase.getString("cabinetType"));
+            editBuildBinding.tvCasePrice.setText("$" + jCase.getDouble("price"));
+            hasCPU = true;
+        } catch (JSONException e) {
+            //return;
+            if (ccase.get(0).getTitle() != null) {
+                Glide.with(EditBuild.this).load(ccase.get(0).getImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivCaseImg);
+                    editBuildBinding.tvCaseName.setText(ccase.get(0).getTitle());
+                    editBuildBinding.tvCaseBrand.setText("Brand: " + ccase.get(0).getBrand());
+                    editBuildBinding.tvCaseModel.setText("Model: " + ccase.get(0).getModel());
+                    editBuildBinding.tvCaseSidePanel.setText("Side Panel: " + ccase.get(0).getSidePanel());
+                    editBuildBinding.tvCaseForm.setText("Cabinet Type: " + ccase.get(0).getCabinetType());
+                    editBuildBinding.tvCasePrice.setText("$" + ccase.get(0).getPrice());
+
+                    hasCase = true;
+            } else {
+                editBuildBinding.tvCaseName.setText("Case");
+                editBuildBinding.tvCaseBrand.setText("Brand: ");
+                editBuildBinding.tvCaseModel.setText("Model: ");
+                editBuildBinding.tvCaseSidePanel.setText("Side Panel: ");
+                editBuildBinding.tvCaseForm.setText("Cabinet Type: ");
+                editBuildBinding.tvCasePrice.setText("$");
+                hasCase = false;
+            }
+        }
+        try {
+            //CaseFan
+            jCaseFan = new JSONObject(sharedPreferences.getString("temp_CaseFan", ""));
+            Glide.with(EditBuild.this).load(jCaseFan.getString("img")).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivCasefanImg);
+            editBuildBinding.tvCasefanName.setText(jCaseFan.getString("title"));
+            editBuildBinding.tvCasefanModel.setText("Model: " + jCaseFan.getString("brand") +" "+ jCaseFan.getString("model"));
+            editBuildBinding.tvCasefanRpm.setText("RPM: " + jCaseFan.getString("rpm"));
+            editBuildBinding.tvCasefanNoiseLvl.setText("Noise Level: " + jCaseFan.getString("noiseLevel"));
+            editBuildBinding.tvCasefanAirflow.setText("Air Flow: " + jCaseFan.getString("airFlow"));
+            editBuildBinding.tvCasefanPrice.setText("$" + jCaseFan.getDouble("price"));
+            hasCaseFan = true;
+        } catch (JSONException e) {
+            //return;
+            if (casefan.get(0).getTitle() != null) {
+                Glide.with(EditBuild.this).load(casefan.get(0).getImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(editBuildBinding.ivCasefanImg);
+                editBuildBinding.tvCasefanName.setText(casefan.get(0).getTitle());
+                editBuildBinding.tvCasefanModel.setText("Model: " + casefan.get(0).getModel());
+                editBuildBinding.tvCasefanRpm.setText("RPM: " + casefan.get(0).getRpm());
+                editBuildBinding.tvCasefanNoiseLvl.setText("Noise Level: " + casefan.get(0).getNoiseLvl());
+                editBuildBinding.tvCasefanAirflow.setText("Air Flow: " + casefan.get(0).getAirFlow());
+                editBuildBinding.tvCasefanPrice.setText("$" + casefan.get(0).getPrice());
+
+                hasCaseFan = true;
+            } else {
+                editBuildBinding.tvCasefanName.setText("Case Fan");
+                editBuildBinding.tvCasefanModel.setText("Model: ");
+                editBuildBinding.tvCasefanRpm.setText("RPM: ");
+                editBuildBinding.tvCasefanNoiseLvl.setText("Noise Level: ");
+                editBuildBinding.tvCasefanAirflow.setText("Air Flow: ");
+                editBuildBinding.tvCasefanPrice.setText("$");
+                hasCaseFan = false;
+            }
+        }
+    }
+
+    private boolean isRAMCompatible(){
+        if(editBuildBinding.tvMoboName.getText().toString().contains("DDR3")) ram_socket = "DDR3";
+        else if(editBuildBinding.tvMoboName.getText().toString().contains("DDR4")) ram_socket = "DDR4";
+
+        if(ram_socket.contains(editBuildBinding.tvMemoryType.getText().toString())) return true;
+
+        return  false;
+    }
+    private boolean isSocketCompatible(){
+        if(editBuildBinding.tvCpuSocket.getText().toString().equalsIgnoreCase(editBuildBinding.tvMoboSocket.getText().toString())){
+            return true;
+        }
+        return false;
     }
 
     private double getEstimated_Price(TextView textView){

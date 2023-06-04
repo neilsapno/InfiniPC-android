@@ -9,16 +9,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.ArrayList;
 
 import cedric.ciel.infinipc.Lists.BuildData;
-import cedric.ciel.infinipc.Parts.CPU;
-import cedric.ciel.infinipc.Parts.Cooler;
-import cedric.ciel.infinipc.Parts.GPU;
-import cedric.ciel.infinipc.Parts.Motherboard;
-import cedric.ciel.infinipc.Parts.RAM;
-import cedric.ciel.infinipc.Parts.Storage;
+import cedric.ciel.infinipc.Parts.*;
 
 public class DBHandler extends SQLiteOpenHelper {
     private static final String DB_NAME = "builds";
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;
 
     // below variable is for our table name.
     private static final String TABLE_NAME = "mybuilds";
@@ -28,6 +23,12 @@ public class DBHandler extends SQLiteOpenHelper {
     private static final String TBL_RAM = "ram";
     private static final String TBL_STORAGE = "storage";
     private static final String TBL_GPU = "gpu";
+    private static final String TBL_PSU = "psu";
+    private static final String TBL_CASE = "ccase";
+    private static final String TBL_CASEFAN = "caseFan";
+
+
+
 
     private static final String ID_COL = "id";
 
@@ -131,10 +132,40 @@ public class DBHandler extends SQLiteOpenHelper {
         String query7 = "CREATE TABLE IF NOT EXISTS " + TBL_GPU + " ("
                 + BUILD_NAME_COL + " TEXT PRIMARY KEY,"
                 + "title TEXT,"
-                + "brand TEXT,"
                 + "model TEXT,"
+                + "speed TEXT,"
                 + "interface TEXT,"
                 + "vram TEXT,"
+                + "link TEXT,"
+                + "img TEXT,"
+                + PRICE_COL + " REAL)";
+        String query8 = "CREATE TABLE IF NOT EXISTS " + TBL_PSU + " ("
+                + BUILD_NAME_COL + " TEXT PRIMARY KEY,"
+                + "title TEXT,"
+                + "brand TEXT,"
+                + "model TEXT,"
+                + "power TEXT,"
+                + "efficiency TEXT,"
+                + "link TEXT,"
+                + "img TEXT,"
+                + PRICE_COL + " REAL)";
+        String query9 = "CREATE TABLE IF NOT EXISTS " + TBL_CASE + " ("
+                + BUILD_NAME_COL + " TEXT PRIMARY KEY,"
+                + "title TEXT,"
+                + "brand TEXT,"
+                + "model TEXT,"
+                + "sidepanel TEXT,"
+                + "cabinettype TEXT,"
+                + "link TEXT,"
+                + "img TEXT,"
+                + PRICE_COL + " REAL)";
+        String query10 = "CREATE TABLE IF NOT EXISTS " + TBL_CASEFAN + " ("
+                + BUILD_NAME_COL + " TEXT PRIMARY KEY,"
+                + "title TEXT,"
+                + "model TEXT,"
+                + "rpm TEXT,"
+                + "noiselvl TEXT,"
+                + "airflow TEXT,"
                 + "link TEXT,"
                 + "img TEXT,"
                 + PRICE_COL + " REAL)";
@@ -145,6 +176,11 @@ public class DBHandler extends SQLiteOpenHelper {
         db.execSQL(query5);
         db.execSQL(query6);
         db.execSQL(query7);
+        db.execSQL(query8);
+        db.execSQL(query9);
+        db.execSQL(query10);
+
+
 
     }
 
@@ -176,7 +212,7 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     public void editBuild(String originalBuildName, String buildName, String CPU, String Cooler, String Mobo, String RAM, String Storage,
-                            String GPU, String Case, String PSU, String CaseFan, int RAMSpeed, int Watts, double Price, String BuildImageUrl) {
+                          String GPU, String Case, String PSU, String CaseFan, int RAMSpeed, int Watts, double Price, String BuildImageUrl) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         BuildData buildData = new BuildData(buildName, CPU, Cooler, Mobo, RAM, Storage, GPU, Case, PSU, CaseFan, RAMSpeed, Watts, Price, BuildImageUrl);
@@ -212,6 +248,9 @@ public class DBHandler extends SQLiteOpenHelper {
         db.delete(TBL_RAM, "build_name=?", new String[]{buildName});
         db.delete(TBL_STORAGE, "build_name=?", new String[]{buildName});
         db.delete(TBL_GPU, "build_name=?", new String[]{buildName});
+        db.delete(TBL_PSU, "build_name=?", new String[]{buildName});
+        db.delete(TBL_CASE, "build_name=?", new String[]{buildName});
+        db.delete(TBL_CASEFAN, "build_name=?", new String[]{buildName});
         db.close();
     }
 
@@ -857,6 +896,7 @@ public class DBHandler extends SQLiteOpenHelper {
         return storage;
     }
 
+
     //add blank cpu
     public void addGPU(String buildname){
         SQLiteDatabase db = this.getWritableDatabase();
@@ -887,10 +927,10 @@ public class DBHandler extends SQLiteOpenHelper {
         // along with its key and value pair.
         values.put(BUILD_NAME_COL, gpu.getBuildName());
         values.put("title", gpu.getTitle());
-        values.put("brand", gpu.getBrand());
         values.put("model", gpu.getModel());
-        values.put("interface", gpu.getSpeed());
-        values.put("vram", gpu.getSocket());
+        values.put("speed", gpu.getSpeed());
+        values.put("interface", gpu.getInterface());
+        values.put("vram", gpu.getVram());
         values.put("link", gpu.getLink());
         values.put("img", gpu.getImg());
         values.put(PRICE_COL, gpu.getPrice());
@@ -953,10 +993,10 @@ public class DBHandler extends SQLiteOpenHelper {
 
         values.put(BUILD_NAME_COL, gpu.getBuildName());
         values.put("title", gpu.getTitle());
-        values.put("brand", gpu.getBrand());
         values.put("model", gpu.getModel());
         values.put("speed", gpu.getSpeed());
-        values.put("socket", gpu.getSocket());
+        values.put("interface", gpu.getInterface());
+        values.put("vram", gpu.getVram());
         values.put("link", gpu.getLink());
         values.put("img", gpu.getImg());
         values.put(PRICE_COL, gpu.getPrice());
@@ -978,17 +1018,376 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    //add blank cpu
+    public void addPSU(String buildname){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        // on below line we are passing all values
+        // along with its key and value pair.
+        values.put(BUILD_NAME_COL, buildname);
+
+        // after adding all values we are passing
+        // content values to our table.
+        db.insert(TBL_PSU, null, values);
+
+        // at last we are closing our
+        // database after adding database.
+        db.close();
+    }
+
+    public void addPSU(String buildname, String title, String brand, String model, String power, String efficiency, String link, String img, double price){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        PSU psu = new PSU(buildname, title, brand, model, power, efficiency, link, img, price);
+
+        ContentValues values = new ContentValues();
+
+        // on below line we are passing all values
+        // along with its key and value pair.
+        values.put(BUILD_NAME_COL, psu.getBuildName());
+        values.put("title", psu.getTitle());
+        values.put("brand", psu.getBrand());
+        values.put("model", psu.getModel());
+        values.put("power", psu.getPower());
+        values.put("efficiency", psu.getEfficiency());
+        values.put("link", psu.getLink());
+        values.put("img", psu.getImg());
+        values.put(PRICE_COL, psu.getPrice());
+
+        // after adding all values we are passing
+        // content values to our table.
+        db.insert(TBL_PSU, null, values);
+
+        // at last we are closing our
+        // database after adding database.
+        db.close();
+    }
+
+    public ArrayList<PSU> getPSU(ArrayList<PSU> psu, String buildname)
+    {
+        // on below line we are creating a
+        // database for reading our database.
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // on below line we are creating a cursor with query to
+        // read data from database.
+        Cursor cursorPSU
+                = db.rawQuery("SELECT * FROM " + TBL_PSU + " WHERE build_name='" + buildname + "'" , null);
+
+        // on below line we are creating a new array list.
+//        ArrayList<BuildData> buildDataArrayList
+//                = new ArrayList<>();
+
+        // moving our cursor to first position.
+        if (cursorPSU.moveToFirst()) {
+            do {
+                // on below line we are adding the data from
+                // cursor to our array list.
+                //CPU(String buildName, String title, String brand, String model, String speed, String socket, String link, String img, double price)
+                psu.add(new PSU(
+                        cursorPSU.getString(0),
+                        cursorPSU.getString(1),
+                        cursorPSU.getString(2),
+                        cursorPSU.getString(3),
+                        cursorPSU.getString(4),
+                        cursorPSU.getString(5),
+                        cursorPSU.getString(6),
+                        cursorPSU.getString(7),
+                        cursorPSU.getDouble(8)));
+            } while (cursorPSU.moveToNext());
+            // moving our cursor to next.
+        }
+        // at last closing our cursor
+        // and returning our array list.
+        cursorPSU.close();
+        return psu;
+    }
+
+    public void updatePSU(String originalBuildName, String buildname, String title, String brand, String model, String power, String efficiency, String link, String img, double price){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        PSU psu = new PSU(buildname, title, brand, model, power, efficiency, link, img, price);
+
+        ContentValues values = new ContentValues();
+
+        values.put(BUILD_NAME_COL, psu.getBuildName());
+        values.put("title", psu.getTitle());
+        values.put("brand", psu.getBrand());
+        values.put("model", psu.getModel());
+        values.put("power", psu.getPower());
+        values.put("efficiency", psu.getEfficiency());
+        values.put("link", psu.getLink());
+        values.put("img", psu.getImg());
+        values.put(PRICE_COL, psu.getPrice());
+
+        db.update(TBL_PSU, values, "build_name=?", new String[]{originalBuildName});
+
+        db.close();
+    }
+
+    public void updatePSU(String originalBuildName, String buildname){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(BUILD_NAME_COL, buildname);
+
+        db.update(TBL_PSU, values, "build_name=?", new String[]{originalBuildName});
+
+        db.close();
+    }
+    //add blank cpu
+    public void addCase(String buildname){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        // on below line we are passing all values
+        // along with its key and value pair.
+        values.put(BUILD_NAME_COL, buildname);
+
+        // after adding all values we are passing
+        // content values to our table.
+        db.insert(TBL_CASE, null, values);
+
+        // at last we are closing our
+        // database after adding database.
+        db.close();
+    }
+
+    public void addCase(String buildname, String title, String brand, String model, String sidePanel, String cabinetType, String link, String img, double price){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Case ccase = new Case(buildname, title, brand, model, sidePanel, cabinetType, link, img, price);
+
+        ContentValues values = new ContentValues();
+
+        // on below line we are passing all values
+        // along with its key and value pair.
+        values.put(BUILD_NAME_COL, ccase.getBuildName());
+        values.put("title", ccase.getTitle());
+        values.put("brand", ccase.getBrand());
+        values.put("model", ccase.getModel());
+        values.put("sidepanel", ccase.getSidePanel());
+        values.put("cabinettype", ccase.getCabinetType());
+        values.put("link", ccase.getLink());
+        values.put("img", ccase.getImg());
+        values.put(PRICE_COL, ccase.getPrice());
+
+        // after adding all values we are passing
+        // content values to our table.
+        db.insert(TBL_CASE, null, values);
+
+        // at last we are closing our
+        // database after adding database.
+        db.close();
+    }
+
+    public ArrayList<Case> getCase(ArrayList<Case> ccase, String buildname)
+    {
+        // on below line we are creating a
+        // database for reading our database.
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // on below line we are creating a cursor with query to
+        // read data from database.
+        Cursor cursorCASE
+                = db.rawQuery("SELECT * FROM " + TBL_CASE + " WHERE build_name='" + buildname + "'" , null);
+
+        // on below line we are creating a new array list.
+        //        ArrayList<BuildData> buildDataArrayList
+        //                = new ArrayList<>();
+
+        // moving our cursor to first position.
+        if (cursorCASE.moveToFirst()) {
+            do {
+                // on below line we are adding the data from
+                // cursor to our array list.
+                //CPU(String buildName, String title, String brand, String model, String speed, String socket, String link, String img, double price)
+                ccase.add(new Case(
+                        cursorCASE.getString(0),
+                        cursorCASE.getString(1),
+                        cursorCASE.getString(2),
+                        cursorCASE.getString(3),
+                        cursorCASE.getString(4),
+                        cursorCASE.getString(5),
+                        cursorCASE.getString(6),
+                        cursorCASE.getString(7),
+                        cursorCASE.getDouble(8)));
+            } while (cursorCASE.moveToNext());
+            // moving our cursor to next.
+        }
+        // at last closing our cursor
+        // and returning our array list.
+        cursorCASE.close();
+        return ccase;
+    }
+
+    public void updateCase(String originalBuildName, String buildname, String title, String brand, String model, String sidePanel, String cabinetType, String link, String img, double price){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Case ccase = new Case(buildname, title, brand, model, sidePanel, cabinetType, link, img, price);
+
+        ContentValues values = new ContentValues();
+
+        values.put(BUILD_NAME_COL, ccase.getBuildName());
+        values.put("title", ccase.getTitle());
+        values.put("brand", ccase.getBrand());
+        values.put("model", ccase.getModel());
+        values.put("sidepanel", ccase.getSidePanel());
+        values.put("cabinettype", ccase.getCabinetType());
+        values.put("link", ccase.getLink());
+        values.put("img", ccase.getImg());
+        values.put(PRICE_COL, ccase.getPrice());
+
+        db.update(TBL_CASE, values, "build_name=?", new String[]{originalBuildName});
+
+        db.close();
+    }
+
+    public void updateCase(String originalBuildName, String buildname){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(BUILD_NAME_COL, buildname);
+
+        db.update(TBL_CASE, values, "build_name=?", new String[]{originalBuildName});
+
+        db.close();
+    }
+
+    //add blank cpu
+    public void addCaseFan(String buildname){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        // on below line we are passing all values
+        // along with its key and value pair.
+        values.put(BUILD_NAME_COL, buildname);
+
+        // after adding all values we are passing
+        // content values to our table.
+        db.insert(TBL_CASEFAN, null, values);
+
+        // at last we are closing our
+        // database after adding database.
+        db.close();
+    }
+
+    public void addCaseFan(String buildname, String title, String model, String rpm, String noiselvl, String airflow, String link, String img, double price){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        CaseFan caseFan = new CaseFan(buildname, title, model, rpm, noiselvl, airflow, link, img, price);
+
+        ContentValues values = new ContentValues();
+
+        // on below line we are passing all values
+        // along with its key and value pair.
+        values.put(BUILD_NAME_COL, caseFan.getBuildName());
+        values.put("title", caseFan.getTitle());
+        values.put("model", caseFan.getModel());
+        values.put("rpm", caseFan.getRpm());
+        values.put("noiselvl", caseFan.getNoiseLvl());
+        values.put("airflow", caseFan.getAirFlow());
+        values.put("link", caseFan.getLink());
+        values.put("img", caseFan.getImg());
+        values.put(PRICE_COL, caseFan.getPrice());
+
+        // after adding all values we are passing
+        // content values to our table.
+        db.insert(TBL_CASEFAN, null, values);
+
+        // at last we are closing our
+        // database after adding database.
+        db.close();
+    }
+
+    public ArrayList<CaseFan> getCaseFan(ArrayList<CaseFan> caseFan, String buildname)
+    {
+        // on below line we are creating a
+        // database for reading our database.
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // on below line we are creating a cursor with query to
+        // read data from database.
+        Cursor cursorCASEFAN
+                = db.rawQuery("SELECT * FROM " + TBL_CASEFAN + " WHERE build_name='" + buildname + "'" , null);
+
+        // on below line we are creating a new array list.
+        //        ArrayList<BuildData> buildDataArrayList
+        //                = new ArrayList<>();
+
+        // moving our cursor to first position.
+        if (cursorCASEFAN.moveToFirst()) {
+            do {
+                // on below line we are adding the data from
+                // cursor to our array list.
+                //CPU(String buildName, String title, String brand, String model, String speed, String socket, String link, String img, double price)
+                caseFan.add(new CaseFan(
+                        cursorCASEFAN.getString(0),
+                        cursorCASEFAN.getString(1),
+                        cursorCASEFAN.getString(2),
+                        cursorCASEFAN.getString(3),
+                        cursorCASEFAN.getString(4),
+                        cursorCASEFAN.getString(5),
+                        cursorCASEFAN.getString(6),
+                        cursorCASEFAN.getString(7),
+                        cursorCASEFAN.getDouble(8)));
+            } while (cursorCASEFAN.moveToNext());
+            // moving our cursor to next.
+        }
+        // at last closing our cursor
+        // and returning our array list.
+        cursorCASEFAN.close();
+        return caseFan;
+    }
 
 
 
+    public void updateCaseFan(String originalBuildName, String buildname, String title, String model, String rpm, String noiselvl, String airflow, String link, String img, double price) {
+        SQLiteDatabase db = this.getWritableDatabase();
 
+        CaseFan caseFan = new CaseFan(buildname, title, model, rpm, noiselvl, airflow, link, img, price);
 
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // this method is called to check if the table exists already.
-        if(oldVersion < newVersion) {
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-            onCreate(db);
+        ContentValues values = new ContentValues();
+
+        values.put(BUILD_NAME_COL, caseFan.getBuildName());
+        values.put("title", caseFan.getTitle());
+        values.put("model", caseFan.getModel());
+        values.put("rpm", caseFan.getModel());
+        values.put("noiselvl", caseFan.getNoiseLvl());
+        values.put("airflow", caseFan.getAirFlow());
+        values.put("link", caseFan.getLink());
+        values.put("img", caseFan.getImg());
+        values.put(PRICE_COL, caseFan.getPrice());
+
+        db.update(TBL_CASEFAN, values, "build_name=?", new String[]{originalBuildName});
+
+        db.close();
+    }
+
+    public void updateCaseFan(String originalBuildName, String buildname){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(BUILD_NAME_COL, buildname);
+
+        db.update(TBL_CASEFAN, values, "build_name=?", new String[]{originalBuildName});
+
+        db.close();
+    }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            // this method is called to check if the table exists already.
+            if(oldVersion < newVersion) {
+                db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+                onCreate(db);
+            }
         }
     }
-}

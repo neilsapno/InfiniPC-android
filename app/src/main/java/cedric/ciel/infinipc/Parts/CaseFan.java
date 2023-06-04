@@ -1,17 +1,17 @@
 package cedric.ciel.infinipc.Parts;
 
-public class GPU {
+public class CaseFan {
 
-    String buildName, title, model, speed, Interface, vram, link, img;
+    String buildName, title, model, rpm, noiseLvl, airFlow, link, img;
     double price;
 
-    public GPU(String buildName, String title, String model, String speed, String Interface, String vram, String link, String img, double price) {
+    public CaseFan(String buildName, String title, String model, String rpm, String noiseLvl, String airFlow, String link, String img, double price) {
         this.buildName = buildName;
         this.title = title;
         this.model = model;
-        this.speed = speed;
-        this.Interface = Interface;
-        this.vram = vram;
+        this.rpm = rpm;
+        this.noiseLvl = noiseLvl;
+        this.airFlow = airFlow;
         this.link = link;
         this.img = img;
         this.price = price;
@@ -41,24 +41,28 @@ public class GPU {
         this.model = model;
     }
 
-    public String getSpeed() {
-        return speed;
-    }
-    public void setSpeed(String brand) {
-        this.speed = speed;
-    }
-    public String getInterface() {
-        return Interface;
+    public String getRpm() {
+        return rpm;
     }
 
-    public void setInterface(String speed) { this.Interface = speed; }
-
-    public String getVram() {
-        return vram;
+    public void setRpm(String rpm) {
+        this.rpm = rpm;
     }
 
-    public void setVram(String socket) {
-        this.vram = socket;
+    public String getNoiseLvl() {
+        return noiseLvl;
+    }
+
+    public void setNoiseLvl(String noiseLvl) {
+        this.noiseLvl = noiseLvl;
+    }
+
+    public String getAirFlow() {
+        return airFlow;
+    }
+
+    public void setAirFlow(String airFlow) {
+        this.airFlow = airFlow;
     }
 
     public double getPrice() {
@@ -84,5 +88,4 @@ public class GPU {
     public void setImg(String img) {
         this.img = img;
     }
-
 }

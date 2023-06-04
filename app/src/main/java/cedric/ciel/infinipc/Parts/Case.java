@@ -1,17 +1,17 @@
 package cedric.ciel.infinipc.Parts;
 
-public class GPU {
+public class Case {
 
-    String buildName, title, model, speed, Interface, vram, link, img;
+    String buildName, title, brand, model, sidePanel, cabinetType, link, img;
     double price;
 
-    public GPU(String buildName, String title, String model, String speed, String Interface, String vram, String link, String img, double price) {
+    public Case(String buildName, String title, String brand, String model, String sidePanel, String cabinetType, String link, String img, double price) {
         this.buildName = buildName;
         this.title = title;
+        this.brand = brand;
         this.model = model;
-        this.speed = speed;
-        this.Interface = Interface;
-        this.vram = vram;
+        this.sidePanel = sidePanel;
+        this.cabinetType = cabinetType;
         this.link = link;
         this.img = img;
         this.price = price;
@@ -33,6 +33,14 @@ public class GPU {
         this.title = title;
     }
 
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
     public String getModel() {
         return model;
     }
@@ -41,24 +49,20 @@ public class GPU {
         this.model = model;
     }
 
-    public String getSpeed() {
-        return speed;
-    }
-    public void setSpeed(String brand) {
-        this.speed = speed;
-    }
-    public String getInterface() {
-        return Interface;
+    public String getSidePanel() {
+        return sidePanel;
     }
 
-    public void setInterface(String speed) { this.Interface = speed; }
-
-    public String getVram() {
-        return vram;
+    public void setSidePanel(String sidePanel) {
+        this.sidePanel = sidePanel;
     }
 
-    public void setVram(String socket) {
-        this.vram = socket;
+    public String getCabinetType() {
+        return cabinetType;
+    }
+
+    public void setCabinetType(String cabinetType) {
+        this.cabinetType = cabinetType;
     }
 
     public double getPrice() {

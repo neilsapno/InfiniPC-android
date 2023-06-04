@@ -1,17 +1,17 @@
 package cedric.ciel.infinipc.Parts;
 
-public class GPU {
+public class PSU {
 
-    String buildName, title, model, speed, Interface, vram, link, img;
+    String buildName, title, brand, model, power, efficiency, link, img;
     double price;
 
-    public GPU(String buildName, String title, String model, String speed, String Interface, String vram, String link, String img, double price) {
+    public PSU(String buildName, String title, String brand, String model, String power, String efficiency, String link, String img, double price) {
         this.buildName = buildName;
         this.title = title;
+        this.brand = brand;
         this.model = model;
-        this.speed = speed;
-        this.Interface = Interface;
-        this.vram = vram;
+        this.power = power;
+        this.efficiency = efficiency;
         this.link = link;
         this.img = img;
         this.price = price;
@@ -33,6 +33,14 @@ public class GPU {
         this.title = title;
     }
 
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
     public String getModel() {
         return model;
     }
@@ -41,24 +49,20 @@ public class GPU {
         this.model = model;
     }
 
-    public String getSpeed() {
-        return speed;
-    }
-    public void setSpeed(String brand) {
-        this.speed = speed;
-    }
-    public String getInterface() {
-        return Interface;
+    public String getPower() {
+        return power;
     }
 
-    public void setInterface(String speed) { this.Interface = speed; }
-
-    public String getVram() {
-        return vram;
+    public void setPower(String power) {
+        this.power = power;
     }
 
-    public void setVram(String socket) {
-        this.vram = socket;
+    public String getEfficiency() {
+        return efficiency;
+    }
+
+    public void setEfficiency(String efficiency) {
+        this.efficiency = efficiency;
     }
 
     public double getPrice() {

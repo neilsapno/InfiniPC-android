@@ -137,8 +137,7 @@ public class BrowseParts extends AppCompatActivity implements StoreAdapter.OnPar
                 e.printStackTrace();
                 Snackbar.make(store_coordinator, "Something went wrong while getting parts list", Snackbar.LENGTH_LONG).show();
             }
-        }
-        else if (typePart.equals("GPUs")) {
+        } else if (typePart.equals("GPUs")) {
             //StoreParts(String img_url, String tv_partsTitle, String tv_partsInfo1, String tv_partsInfo2, String tv_partsInfo3, String tv_partsInfo4, String partsID, String link, double tv_partsPrice)
             try {
                 JSONArray jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "gpus", ""));
@@ -148,6 +147,49 @@ public class BrowseParts extends AppCompatActivity implements StoreAdapter.OnPar
                     storeParts.add(new StoreParts(json.getString("img"), json.getString("title"), json.getString("brand"), json.getString("model"), json.getString("storageInterface"), json.getString("memory"), json.getString("id"), json.getString("link"), json.getDouble("price")));
                     //Log.d("JSON get", "json: " + json);
                     Snackbar.make(store_coordinator, "RAMs Loaded", Snackbar.LENGTH_SHORT).show();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Snackbar.make(store_coordinator, "Something went wrong while getting parts list", Snackbar.LENGTH_LONG).show();
+            }
+        } else if (typePart.equals("PSUs")) {
+            try {
+                JSONArray jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "psus", ""));
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject json = jsonArray.getJSONObject(i);
+                    storeParts.add(new StoreParts(json.getString("img"), json.getString("title"), json.getString("brand"), json.getString("model"), json.getString("power"), json.getString("efficiency"), json.getString("id"), json.getString("link"), json.getDouble("price")));
+                    //Log.d("JSON get", "json: " + json);
+                    Snackbar.make(store_coordinator, "PSUs Loaded", Snackbar.LENGTH_SHORT).show();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Snackbar.make(store_coordinator, "Something went wrong while getting parts list", Snackbar.LENGTH_LONG).show();
+            }
+        } else if (typePart.equals("Cases")) {
+            //StoreParts(String img_url, String tv_partsTitle, String tv_partsInfo1, String tv_partsInfo2, String tv_partsInfo3, String tv_partsInfo4, String partsID, String link, double tv_partsPrice)
+            try {
+                JSONArray jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "cases", ""));
+//                Toast.makeText(this, "" + jsonArray.length(), Toast.LENGTH_SHORT).show();
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject json = jsonArray.getJSONObject(i);
+                    storeParts.add(new StoreParts(json.getString("img"), json.getString("title"), json.getString("brand"), json.getString("model"), json.getString("sidePanel"), json.getString("cabinetType"), json.getString("id"), json.getString("link"), json.getDouble("price")));
+                    //Log.d("JSON get", "json: " + json);
+                    Snackbar.make(store_coordinator, "Cases Loaded", Snackbar.LENGTH_SHORT).show();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Snackbar.make(store_coordinator, "Something went wrong while getting parts list", Snackbar.LENGTH_LONG).show();
+            }
+        } else if (typePart.equals("CaseFans")) {
+            //StoreParts(String img_url, String tv_partsTitle, String tv_partsInfo1, String tv_partsInfo2, String tv_partsInfo3, String tv_partsInfo4, String partsID, String link, double tv_partsPrice)
+            try {
+                JSONArray jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "casefans", ""));
+//                Toast.makeText(this, "" + jsonArray.length(), Toast.LENGTH_SHORT).show();
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject json = jsonArray.getJSONObject(i);
+                    storeParts.add(new StoreParts(json.getString("img"), json.getString("title"), json.getString("brand") + " " + json.getString("model"), json.getString("rpm"), json.getString("noiseLevel"), json.getString("airFlow"), json.getString("id"), json.getString("link"), json.getDouble("price")));
+                    //Log.d("JSON get", "json: " + json);
+                    Snackbar.make(store_coordinator, "Case Fans Loaded", Snackbar.LENGTH_SHORT).show();
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -163,51 +205,61 @@ public class BrowseParts extends AppCompatActivity implements StoreAdapter.OnPar
 
     @Override
     public void onPartClick(int position, String partID) {
-        if(typePart.equalsIgnoreCase("CPU")) {
-//            Toast.makeText(BrowseParts.this, partID, Toast.LENGTH_SHORT).show();
+        if (typePart.equalsIgnoreCase("CPU")) {
             editor.putString("temp_CPU", getPartsInfo(partID));
-        }
-        else if(typePart.equalsIgnoreCase("Coolers")){
-//            Toast.makeText(BrowseParts.this, partID, Toast.LENGTH_SHORT).show();
+        } else if (typePart.equalsIgnoreCase("Coolers")) {
             editor.putString("temp_Cooler", getPartsInfo(partID));
-        }
-        else if(typePart.equalsIgnoreCase("Mobos")){
-//            Toast.makeText(BrowseParts.this, partID, Toast.LENGTH_SHORT).show();
+        } else if (typePart.equalsIgnoreCase("Mobos")) {
             editor.putString("temp_Mobo", getPartsInfo(partID));
-        }
-        else if(typePart.equalsIgnoreCase("RAMs")){
-//            Toast.makeText(BrowseParts.this, partID, Toast.LENGTH_SHORT).show();
+        } else if (typePart.equalsIgnoreCase("RAMs")) {
             editor.putString("temp_RAM", getPartsInfo(partID));
-        }
-        else if(typePart.equalsIgnoreCase("Storages")){
-//            Toast.makeText(BrowseParts.this, partID, Toast.LENGTH_SHORT).show();
+        } else if (typePart.equalsIgnoreCase("Storages")) {
             editor.putString("temp_Storage", getPartsInfo(partID));
+        } else if (typePart.equalsIgnoreCase("GPUs")) {
+            editor.putString("temp_GPU", getPartsInfo(partID));
+        } else if (typePart.equalsIgnoreCase("PSUs")) {
+            editor.putString("temp_PSU", getPartsInfo(partID));
+        } else if (typePart.equalsIgnoreCase("Cases")) {
+            editor.putString("temp_Case", getPartsInfo(partID));
+        } else if (typePart.equalsIgnoreCase("CaseFans")) {
+            editor.putString("temp_CaseFan", getPartsInfo(partID));
         }
         editor.apply();
 
-        if(fromActivity.equals("new")) {
+        if (fromActivity.equals("new")) {
             Intent newbuild = new Intent(BrowseParts.this, NewBuild.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(newbuild);
-        }
-        else{
+        } else {
             Intent editbuild = new Intent(BrowseParts.this, EditBuild.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(editbuild);
         }
     }
 
-    private String getPartsInfo(String partID){
+    private String getPartsInfo(String partID) {
         try {
             JSONArray jsonArray = new JSONArray();
-            if(typePart.equalsIgnoreCase("cpu")) jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() +"processors", ""));
-            else if(typePart.equalsIgnoreCase("coolers")) jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() +"coolers", ""));
-            else if(typePart.equalsIgnoreCase("mobos")) jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() +"mobos", ""));
-            else if(typePart.equalsIgnoreCase("rams")) jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() +"rams", ""));
-            else if(typePart.equalsIgnoreCase("storages")) jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() +"storages", ""));
+            if (typePart.equalsIgnoreCase("CPU"))
+                jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "processors", ""));
+            else if (typePart.equalsIgnoreCase("Coolers"))
+                jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "coolers", ""));
+            else if (typePart.equalsIgnoreCase("Mobos"))
+                jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "mobos", ""));
+            else if (typePart.equalsIgnoreCase("RAMs"))
+                jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "rams", ""));
+            else if (typePart.equalsIgnoreCase("Storages"))
+                jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "storages", ""));
+            else if (typePart.equalsIgnoreCase("GPUs"))
+                jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "gpus", ""));
+            else if (typePart.equalsIgnoreCase("PSUs"))
+                jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "psus", ""));
+            else if (typePart.equalsIgnoreCase("Cases"))
+                jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "cases", ""));
+            else if (typePart.equalsIgnoreCase("CaseFans"))
+                jsonArray = new JSONArray(sharedPreferences.getString(this.getPackageName() + "casefans", ""));
 
-
-            for(int i = 0; i<jsonArray.length();i++) {
+            for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject json = jsonArray.getJSONObject(i);
-                if(json.getString("id").equals(partID)){
+                if (json.getString("id").equals(partID)) {
 
                     return json.toString();
                 }
